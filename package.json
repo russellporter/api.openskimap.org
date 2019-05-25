@@ -4,6 +4,7 @@
   "description": "REST API for OpenSkiMap.org frontend",
   "main": "src/index.ts",
   "dependencies": {
+    "@types/express": "^4.16.1",
     "express": "^4.16.4"
   },
   "devDependencies": {
