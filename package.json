@@ -5,9 +5,12 @@
   "main": "src/index.ts",
   "dependencies": {
     "@types/express": "^4.16.1",
-    "express": "^4.16.4"
+    "arangojs": "^6.10.0",
+    "express": "^4.16.4",
+    "openskidata-format": "^0.1.4"
   },
   "devDependencies": {
+    "@types/geojson": "^7946.0.7",
     "typescript": "^3.4.5"
   },
   "scripts": {

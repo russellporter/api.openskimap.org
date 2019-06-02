@@ -6,7 +6,3 @@ services:
       - 8529:8529
     environment:
       - ARANGO_NO_AUTH=1d
-  tippecanoe:
-    image: klokantech/tippecanoe
-    volumes:
-      - ./raw_data:/data
