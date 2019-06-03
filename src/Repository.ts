@@ -1,5 +1,10 @@
 import * as arangojs from "arangojs";
-import { LiftFeature, RunFeature, SkiAreaFeature } from "openskidata-format";
+import {
+  FeatureType,
+  LiftFeature,
+  RunFeature,
+  SkiAreaFeature
+} from "openskidata-format";
 import * as Config from "./Config";
 
 export class Repository {
@@ -10,6 +15,23 @@ export class Repository {
     this.database = database;
     this.collection = database.collection(Config.arangodb.featuresCollection);
   }
+
+  search = async (
+    text: string,
+    type: FeatureType,
+    limit: number
+  ): Promise<(RunFeature | LiftFeature | SkiAreaFeature)[]> => {
+    const cursor = await this.database.query(arangojs.aql`
+    FOR feature IN FULLTEXT(${this.collection}, "searchableText", ${text})
+    FILTER feature.type == ${type}
+    LIMIT ${limit}
+    RETURN feature
+    `);
+    return await cursor
+      .all()
+      .then((results: any[]) => results.map(r => r.feature));
+  };
+
   upsert = async (
     feature: LiftFeature | RunFeature | SkiAreaFeature
   ): Promise<void> => {
