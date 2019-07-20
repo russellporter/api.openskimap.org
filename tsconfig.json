@@ -13,7 +13,11 @@
       "es2015.collection",
       "dom" /* ArangoJS workaround */
     ],
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "baseUrl": ".",
+    "paths": {
+      "*": ["types/*"]
+    }
   },
   "include": ["./src/**/*"]
 }
