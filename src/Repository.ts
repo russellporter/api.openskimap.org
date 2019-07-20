@@ -16,6 +16,12 @@ export class Repository {
     this.collection = database.collection(Config.arangodb.featuresCollection);
   }
 
+  get = async (
+    id: string
+  ): Promise<RunFeature | LiftFeature | SkiAreaFeature | null> => {
+    return await this.collection.document({ _key: id });
+  };
+
   search = async (
     text: string,
     type: FeatureType,

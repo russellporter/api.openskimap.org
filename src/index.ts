@@ -30,5 +30,18 @@ const port = 3000;
     })
   );
 
+  app.get(
+    "/features/:id",
+    async(async (req, res) => {
+      const feature = await repository.get(req.params.id);
+
+      if (feature === null) {
+        res.sendStatus(404);
+      } else {
+        res.send(feature);
+      }
+    })
+  );
+
   app.listen(port, () => console.log(`Listening on ${port}`));
 })();
