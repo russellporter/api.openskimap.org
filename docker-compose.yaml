@@ -1,8 +1,28 @@
 version: "3.3"
 services:
+  app:
+    image: "node:10"
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=production
+      - ARANGODB_URL=http://arangodb:8529/
+    volumes:
+      - .:/home/node/app
+    ports:
+      - 3000
+    command: "npm run start"
+    networks:
+      - db
+    depends_on:
+      - arangodb
   arangodb:
     image: arangodb:3.4.3
-    ports:
-      - 8529:8529
+    expose:
+      - 8529
     environment:
       - ARANGO_NO_AUTH=1d
+    networks:
+      - db
+networks:
+  db:
