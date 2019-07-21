@@ -21,11 +21,7 @@ export class Repository {
   ): Promise<RunFeature | LiftFeature | SkiAreaFeature | null> => {
     const document = await this.collection.document({ _key: id });
 
-    return {
-      type: "Feature",
-      properties: document.properties,
-      geometry: document.geometry
-    };
+    return documentToFeature(document);
   };
 
   search = async (
@@ -41,7 +37,7 @@ export class Repository {
     `);
     return await cursor
       .all()
-      .then((results: any[]) => results.map(r => r.feature));
+      .then((results: any[]) => results.map(documentToFeature));
   };
 
   upsert = async (
@@ -81,5 +77,13 @@ export class Repository {
         } 
       IN ${this.collection}
       `);
+  };
+}
+
+function documentToFeature(document: any): any {
+  return {
+    type: "Feature",
+    properties: document.properties,
+    geometry: document.geometry
   };
 }
