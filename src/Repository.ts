@@ -19,7 +19,13 @@ export class Repository {
   get = async (
     id: string
   ): Promise<RunFeature | LiftFeature | SkiAreaFeature | null> => {
-    return await this.collection.document({ _key: id });
+    const document = await this.collection.document({ _key: id });
+
+    return {
+      type: "Feature",
+      properties: document.properties,
+      geometry: document.geometry
+    };
   };
 
   search = async (
@@ -61,7 +67,7 @@ export class Repository {
           type: ${feature.properties.type},
           searchableText: ${searchableText},
           geometry: ${feature.geometry},
-          feature: ${feature},
+          properties: ${feature.properties},
           modificationDate: DATE_NOW()
         } 
       UPDATE
@@ -70,7 +76,7 @@ export class Repository {
           type: ${feature.properties.type},
           searchableText: ${searchableText},
           geometry: ${feature.geometry},
-          feature: ${feature},
+          properties: ${feature.properties},
           modificationDate: DATE_NOW()
         } 
       IN ${this.collection}
