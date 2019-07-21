@@ -31,7 +31,7 @@ const port = 3000;
   );
 
   app.get(
-    "/features/:id",
+    "/features/:id.geojson",
     async(async (req, res) => {
       const feature = await repository.get(req.params.id);
 
