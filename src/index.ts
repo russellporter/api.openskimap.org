@@ -28,7 +28,7 @@ const port = 3000;
 
       let limit = 5;
 
-      const skiAreas = await repository.search(
+      const skiAreas: GeoJSON.Feature[] = await repository.search(
         sanitizedText,
         FeatureType.SkiArea,
         limit
@@ -47,7 +47,7 @@ const port = 3000;
         runs = await repository.search(sanitizedText, FeatureType.Run, limit);
       }
 
-      res.send({ skiAreas: skiAreas, lifts: lifts, runs: runs });
+      res.send(skiAreas.concat(lifts, runs));
     })
   );
 
