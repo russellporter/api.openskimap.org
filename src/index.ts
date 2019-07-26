@@ -26,13 +26,28 @@ const port = 3000;
         .map(c => "prefix:" + c)
         .join(",");
 
+      let limit = 5;
+
       const skiAreas = await repository.search(
         sanitizedText,
         FeatureType.SkiArea,
-        5
+        limit
       );
 
-      res.send(skiAreas);
+      let lifts: GeoJSON.Feature[] = [];
+      let runs: GeoJSON.Feature[] = [];
+
+      limit -= skiAreas.length;
+      if (limit > 0) {
+        lifts = await repository.search(sanitizedText, FeatureType.Lift, limit);
+      }
+
+      limit -= lifts.length;
+      if (limit > 0) {
+        runs = await repository.search(sanitizedText, FeatureType.Run, limit);
+      }
+
+      res.send({ skiAreas: skiAreas, lifts: lifts, runs: runs });
     })
   );
 
