@@ -9,6 +9,12 @@ const port = 3000;
 (async () => {
   const repository = await getRepository();
 
+  app.get("/*", function(_, res, next) {
+    res.header("Access-Control-Allow-Methods", "GET");
+    res.header("Access-Control-Allow-Origin", "*");
+    next();
+  });
+
   app.get(
     "/search",
     async(async (req, res) => {
