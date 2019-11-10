@@ -11,7 +11,7 @@ export class DataImporter {
     this.repository = repository;
   }
 
-  import = async (geoJSONFiles: string[]): Promise<void> => {
+  import = async (geoJSONFiles: string[], importID: string): Promise<void> => {
     await Promise.all(
       geoJSONFiles.map(file => {
         streamToPromise(
@@ -19,7 +19,7 @@ export class DataImporter {
             // TODO: Add parallelism
             andFinally(
               async (feature: RunFeature | LiftFeature | SkiAreaFeature) =>
-                await this.repository.upsert(feature)
+                await this.repository.upsert(feature, importID)
             )
           )
         );
@@ -27,7 +27,7 @@ export class DataImporter {
     );
   };
 
-  purgeOldData() {
-    // TODO: Implement
-  }
+  purgeOldData = async (excludingImportID: string): Promise<void> => {
+    return await this.repository.removeExceptImport(excludingImportID);
+  };
 }

@@ -18,7 +18,7 @@ services:
       - arangodb
   arangodb:
     image: arangodb:3.4.3
-    expose:
+    ports:
       - 8529
     environment:
       - ARANGO_NO_AUTH=1d

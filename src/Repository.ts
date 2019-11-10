@@ -40,20 +40,31 @@ export class Repository {
       .then((results: any[]) => results.map(documentToFeature));
   };
 
+  removeExceptImport = async (importID: string): Promise<void> => {
+    await this.database.query(arangojs.aql`
+    FOR feature IN ${this.collection}
+    FILTER feature.importID != ${importID}
+    REMOVE feature IN ${this.collection}
+    `);
+  };
+
   upsert = async (
-    feature: LiftFeature | RunFeature | SkiAreaFeature
+    feature: LiftFeature | RunFeature | SkiAreaFeature,
+    importID: string
   ): Promise<void> => {
     await this.upsertData(
       feature.properties.id,
       feature,
-      [feature.properties.name].filter((v): v is string => v !== null)
+      [feature.properties.name].filter((v): v is string => v !== null),
+      importID
     );
   };
 
   private upsertData = async (
     id: string,
     feature: RunFeature | LiftFeature | SkiAreaFeature,
-    searchableText: string[]
+    searchableText: string[],
+    importID: string
   ): Promise<void> => {
     await this.database.query(arangojs.aql`
       UPSERT { _key: ${id} }
@@ -64,7 +75,7 @@ export class Repository {
           searchableText: ${searchableText},
           geometry: ${feature.geometry},
           properties: ${feature.properties},
-          modificationDate: DATE_NOW()
+          importID: ${importID}
         } 
       UPDATE
         {
@@ -73,7 +84,7 @@ export class Repository {
           searchableText: ${searchableText},
           geometry: ${feature.geometry},
           properties: ${feature.properties},
-          modificationDate: DATE_NOW()
+          importID: ${importID}
         } 
       IN ${this.collection}
       `);
