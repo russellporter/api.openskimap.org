@@ -45,6 +45,7 @@ export class Repository {
     FOR feature IN ${this.collection}
     FILTER feature.importID != ${importID}
     REMOVE feature IN ${this.collection}
+    OPTIONS { exclusive: true }
     `);
   };
 
@@ -87,6 +88,7 @@ export class Repository {
           importID: ${importID}
         } 
       IN ${this.collection}
+      OPTIONS { exclusive: true }
       `);
   };
 }
