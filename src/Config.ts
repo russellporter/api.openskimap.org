@@ -3,3 +3,7 @@ export const arangodb = {
   database: process.env.ARANGODB_DATABASE || "openskimap",
   featuresCollection: "features",
 };
+
+export const frontend = {
+  path: process.env.FRONTEND_PATH,
+};

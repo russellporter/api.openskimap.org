@@ -1,5 +1,8 @@
 import express from "express";
 import { FeatureType } from "openskidata-format";
+import * as path from "path";
+import querystring from "querystring";
+import * as config from "./Config";
 import { async } from "./Middleware";
 import getRepository from "./RepositoryFactory";
 
@@ -8,6 +11,27 @@ const port = 3000;
 
 (async () => {
   const repository = await getRepository();
+
+  app.get("/index.html", async (req, res) => {
+    const query = querystring.parse(req.query);
+    if (query.obj && typeof query.obj === "string") {
+      try {
+        const object = await repository.get(query.obj);
+        if (object === null) {
+          res.status(404);
+        }
+      } catch {}
+    }
+
+    const frontendPath = config.frontend.path;
+    if (!frontendPath) {
+      console.log("Missing frontend path, cannot handle index.html responses");
+      res.status(500);
+      return;
+    }
+
+    res.sendFile(path.join(frontendPath, "index.html"));
+  });
 
   app.get("/*", function (_, res, next) {
     res.header("Access-Control-Allow-Methods", "GET");
