@@ -20,13 +20,16 @@ const port = 3000;
         if (object === null) {
           res.status(404);
         }
-      } catch {}
+      } catch (error) {
+        console.log(`Failed to verify object`);
+        console.log(error);
+      }
     }
 
     const frontendPath = config.frontend.path;
     if (!frontendPath) {
       console.log("Missing frontend path, cannot handle index.html responses");
-      res.status(500);
+      res.sendStatus(500);
       return;
     }
 
