@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 
-export const async: (fn: RequestHandler) => RequestHandler = fn => (
+export const async: (fn: RequestHandler) => RequestHandler = (fn) => (
   req,
   res,
   next

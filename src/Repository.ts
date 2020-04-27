@@ -3,7 +3,7 @@ import {
   FeatureType,
   LiftFeature,
   RunFeature,
-  SkiAreaFeature
+  SkiAreaFeature,
 } from "openskidata-format";
 import * as Config from "./Config";
 
@@ -97,6 +97,6 @@ function documentToFeature(document: any): any {
   return {
     type: "Feature",
     properties: document.properties,
-    geometry: document.geometry
+    geometry: document.geometry,
   };
 }

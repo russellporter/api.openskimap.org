@@ -13,7 +13,7 @@ export class DataImporter {
 
   import = async (geoJSONFiles: string[], importID: string): Promise<void> => {
     await Promise.all(
-      geoJSONFiles.map(file => {
+      geoJSONFiles.map((file) => {
         streamToPromise(
           readGeoJSONFeatures(file).pipe(
             // TODO: Add parallelism

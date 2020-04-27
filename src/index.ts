@@ -9,7 +9,7 @@ const port = 3000;
 (async () => {
   const repository = await getRepository();
 
-  app.get("/*", function(_, res, next) {
+  app.get("/*", function (_, res, next) {
     res.header("Access-Control-Allow-Methods", "GET");
     res.header("Access-Control-Allow-Origin", "*");
     next();
@@ -21,9 +21,9 @@ const port = 3000;
       const text: string = req.query.query;
       const sanitizedText = text
         .split(new RegExp("[\\s,\\*\\-\\+\\|\\:\\.]+"))
-        .map(c => c.trim())
-        .filter(c => c.length > 0)
-        .map(c => "prefix:" + c)
+        .map((c) => c.trim())
+        .filter((c) => c.length > 0)
+        .map((c) => "prefix:" + c)
         .join(",");
 
       let limit = 5;

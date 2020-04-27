@@ -5,12 +5,12 @@ export function andFinally<X>(mapper: (input: X) => Promise<void>): Writable {
     objectMode: true,
     write: (data: X, _, done) => {
       mapper(data)
-        .then(value => {
+        .then((value) => {
           done();
         })
-        .catch(error => {
+        .catch((error) => {
           done(error);
         });
-    }
+    },
   });
 }
