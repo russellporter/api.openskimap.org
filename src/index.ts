@@ -1,7 +1,6 @@
 import express from "express";
 import { FeatureType } from "openskidata-format";
 import * as path from "path";
-import querystring from "querystring";
 import * as config from "./Config";
 import { async } from "./Middleware";
 import getRepository from "./RepositoryFactory";
@@ -13,10 +12,9 @@ const port = 3000;
   const repository = await getRepository();
 
   app.get("/index.html", async (req, res) => {
-    const query = querystring.parse(req.query);
-    if (query.obj && typeof query.obj === "string") {
+    if (req.query.obj && typeof req.query.obj === "string") {
       try {
-        const objectExists = await repository.has(query.obj);
+        const objectExists = await repository.has(req.query.obj);
         if (!objectExists) {
           res.status(404);
         }
