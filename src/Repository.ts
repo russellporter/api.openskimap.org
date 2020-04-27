@@ -16,9 +16,13 @@ export class Repository {
     this.collection = database.collection(Config.arangodb.featuresCollection);
   }
 
+  has = async (id: string): Promise<boolean> => {
+    return await this.collection.documentExists({ _key: id });
+  };
+
   get = async (
     id: string
-  ): Promise<RunFeature | LiftFeature | SkiAreaFeature | null> => {
+  ): Promise<RunFeature | LiftFeature | SkiAreaFeature> => {
     const document = await this.collection.document({ _key: id });
 
     return documentToFeature(document);

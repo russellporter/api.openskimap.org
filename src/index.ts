@@ -16,8 +16,8 @@ const port = 3000;
     const query = querystring.parse(req.query);
     if (query.obj && typeof query.obj === "string") {
       try {
-        const object = await repository.get(query.obj);
-        if (object === null) {
+        const objectExists = await repository.has(query.obj);
+        if (!objectExists) {
           res.status(404);
         }
       } catch (error) {
