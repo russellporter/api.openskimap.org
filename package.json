@@ -28,7 +28,8 @@
     "watch": "tsc -w -p .",
     "debug": "nodemon --watch ./dist --inspect=0.0.0.0:9222 --nolazy ./dist/index.js",
     "docker-debug": "docker-compose up",
-    "start": "node ./dist/index.js"
+    "start": "node ./dist/index.js",
+    "check-types": "tsc"
   },
   "author": "Russell Porter",
   "license": "ISC"
