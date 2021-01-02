@@ -19,7 +19,7 @@
     "@types/uuid": "^3.4.6",
     "prettier": "^2.0.5",
     "ts-node": "^8.2.0",
-    "typescript": "^3.4.5"
+    "typescript": "4"
   },
   "scripts": {
     "import-data": "node -r ts-node/register src/scripts/import_data.ts",
