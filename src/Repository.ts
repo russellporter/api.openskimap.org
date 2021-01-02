@@ -3,7 +3,7 @@ import {
   FeatureType,
   LiftFeature,
   RunFeature,
-  SkiAreaFeature,
+  SkiAreaFeature
 } from "openskidata-format";
 import * as Config from "./Config";
 
@@ -60,7 +60,6 @@ export class Repository {
     await this.upsertData(
       feature.properties.id,
       feature,
-      [feature.properties.name].filter((v): v is string => v !== null),
       importID
     );
   };
@@ -68,9 +67,9 @@ export class Repository {
   private upsertData = async (
     id: string,
     feature: RunFeature | LiftFeature | SkiAreaFeature,
-    searchableText: string[],
     importID: string
   ): Promise<void> => {
+    const searchableText = getSearchableText(feature);
     await this.database.query(arangojs.aql`
       UPSERT { _key: ${id} }
       INSERT 
@@ -95,6 +94,11 @@ export class Repository {
       OPTIONS { exclusive: true }
       `);
   };
+}
+
+function getSearchableText(feature: RunFeature | LiftFeature | SkiAreaFeature): string[] {
+  const location = feature.properties.type == FeatureType.SkiArea ? feature.properties.location : null;
+  return [feature.properties.name, location?.localized.en.locality, location?.localized.en.region, location?.localized.en.country].filter((v): v is string => !!v)
 }
 
 function documentToFeature(document: any): any {
