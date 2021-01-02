@@ -51,7 +51,7 @@ const port = 3000;
         .map((c) => "prefix:" + c)
         .join(",");
 
-      let limit = 5;
+      let limit = 10;
 
       const skiAreas: GeoJSON.Feature[] = await repository.search(
         sanitizedText,
