@@ -11,7 +11,7 @@
     "openskidata-format": "^0.13.1",
     "stream-to-promise": "^2.2.0",
     "tslib": "^1.14.1",
-    "uuid": "^3.3.3"
+    "uuid": "^3.4.0"
   },
   "devDependencies": {
     "@types/geojson": "^7946.0.7",
