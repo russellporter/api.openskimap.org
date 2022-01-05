@@ -43,7 +43,12 @@ const port = 3000;
   app.get(
     "/search",
     async(async (req, res) => {
-      const text: string = req.query.query;
+      const text = req.query.query;
+      if (typeof text !== "string") {
+        res.status(400).json({ error: 'Invalid query' });
+        return;
+      }
+
       const sanitizedText = text
         .split(new RegExp("[\\s,\\*\\-\\+\\|\\:\\.]+"))
         .map((c) => c.trim())
