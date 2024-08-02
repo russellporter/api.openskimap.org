@@ -1,7 +1,6 @@
-version: "3.3"
 services:
   app:
-    image: "node:14"
+    image: "node:20"
     user: "node"
     working_dir: /home/node/app
     environment:
@@ -10,16 +9,16 @@ services:
     volumes:
       - .:/home/node/app
     ports:
-      - 3000
+      - 3000:3000
     command: 'sh -c "sleep 5 && npm run start"'
     networks:
       - db
     depends_on:
       - arangodb
   arangodb:
-    image: arangodb:3.4.3
+    image: arangodb:3.12.1
     ports:
-      - 8529
+      - 8529:8529
     environment:
       - ARANGO_NO_AUTH=1d
     networks:

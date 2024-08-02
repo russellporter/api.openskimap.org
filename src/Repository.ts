@@ -1,4 +1,5 @@
 import * as arangojs from "arangojs";
+import * as arangojsCollection from "arangojs/collection";
 import {
   FeatureType,
   LiftFeature,
@@ -9,7 +10,7 @@ import * as Config from "./Config";
 
 export class Repository {
   private database: arangojs.Database;
-  private collection: arangojs.DocumentCollection;
+  private collection: arangojsCollection.DocumentCollection<any, any>;
 
   constructor(database: arangojs.Database) {
     this.database = database;
@@ -33,12 +34,15 @@ export class Repository {
     type: FeatureType,
     limit: number
   ): Promise<(RunFeature | LiftFeature | SkiAreaFeature)[]> => {
-    const cursor = await this.database.query(arangojs.aql`
-    FOR feature IN FULLTEXT(${this.collection}, "searchableText", ${text})
-    FILTER feature.type == ${type}
+    const query = arangojs.aql`
+    FOR feature IN ${this.collection}
+    OPTIONS { indexHint: "textSearch", forceIndexHint: true }
+    FILTER TOKENS(${text}, "en_edge_ngram") ALL == feature.searchableText 
+    AND feature.type == ${type}
     LIMIT ${limit}
     RETURN feature
-    `);
+    `
+    const cursor = await this.database.query(query);
     return await cursor
       .all()
       .then((results: any[]) => results.map(documentToFeature));

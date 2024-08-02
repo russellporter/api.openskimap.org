@@ -49,17 +49,10 @@ const port = 3000;
         return;
       }
 
-      const sanitizedText = text
-        .split(new RegExp("[\\s,\\*\\-\\+\\|\\:\\.]+"))
-        .map((c) => c.trim())
-        .filter((c) => c.length > 0)
-        .map((c) => "prefix:" + c)
-        .join(",");
-
       let limit = 10;
 
       const skiAreas: GeoJSON.Feature[] = await repository.search(
-        sanitizedText,
+        text,
         FeatureType.SkiArea,
         limit
       );
@@ -69,12 +62,12 @@ const port = 3000;
 
       limit -= skiAreas.length;
       if (limit > 0) {
-        lifts = await repository.search(sanitizedText, FeatureType.Lift, limit);
+        lifts = await repository.search(text, FeatureType.Lift, limit);
       }
 
       limit -= lifts.length;
       if (limit > 0) {
-        runs = await repository.search(sanitizedText, FeatureType.Run, limit);
+        runs = await repository.search(text, FeatureType.Run, limit);
       }
 
       res.send(skiAreas.concat(lifts, runs));
