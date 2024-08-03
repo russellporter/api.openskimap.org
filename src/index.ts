@@ -43,9 +43,15 @@ const port = 3000;
   app.get(
     "/search",
     async(async (req, res) => {
-      const text = req.query.query;
+      let text = req.query.query;
       if (typeof text !== "string") {
         res.status(400).json({ error: 'Invalid query' });
+        return;
+      }
+
+      text = text.trim();
+      if (text.length === 0) {
+        res.send([]);
         return;
       }
 
