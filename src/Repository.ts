@@ -37,7 +37,7 @@ export class Repository {
     const query = arangojs.aql`
     FOR feature IN ${this.collection}
     OPTIONS { indexHint: "textSearch", forceIndexHint: true }
-    FILTER TOKENS(${text}, "en_edge_ngram") ALL == feature.searchableText 
+    FILTER TOKENS(${text}, "en_edge_ngram") ANY == feature.searchableText 
     AND feature.type == ${type}
     LIMIT ${limit}
     RETURN feature
