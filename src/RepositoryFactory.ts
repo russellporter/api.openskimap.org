@@ -12,7 +12,7 @@ export default async function getRepository(): Promise<Repository> {
 
   client.database(Config.arangodb.database);
 
-  await client.createAnalyzer('en_edge_ngram', {
+  await client.createAnalyzer('en_edge_ngram_v2', {
     type: 'text',
     properties: {
       locale: 'en',
@@ -21,7 +21,7 @@ export default async function getRepository(): Promise<Repository> {
       stemming: false,
       edgeNgram: {
         min: 3,
-        max: 6,
+        max: 20,
         preserveOriginal: true
       }
     }
@@ -37,8 +37,8 @@ export default async function getRepository(): Promise<Repository> {
   await featuresCollection.ensureIndex({type: "geo", fields: ["geometry"], geoJson: true})
   await featuresCollection.ensureIndex({
     type: 'inverted',
-    name: 'textSearch',
-    fields: [{name: 'searchableText[*]', analyzer: 'en_edge_ngram'}, {name: 'type'}]
+    name: 'textSearch_v2',
+    fields: [{name: 'searchableText[*]', analyzer: 'en_edge_ngram_v2'}, {name: 'type'}]
   })
 
   const view = await client.view('textSearch');
