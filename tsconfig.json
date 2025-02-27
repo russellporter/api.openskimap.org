@@ -8,9 +8,7 @@
     "module": "commonjs",
     "target": "esnext",
     "lib": [
-      "es6",
-      "es2015.promise",
-      "es2015.collection",
+      "esnext",
       "dom" /* ArangoJS workaround */
     ],
     "typeRoots": ["./node_modules/@types"],

@@ -8,7 +8,7 @@
     "arangojs": "^9",
     "express": "^4.21.2",
     "JSONStream": "^1.3.5",
-    "openskidata-format": "^0.14.0",
+    "openskidata-format": "^1.0.0",
     "stream-to-promise": "^3",
     "tslib": "^2",
     "uuid": "^10"
