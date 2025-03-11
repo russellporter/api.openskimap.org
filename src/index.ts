@@ -1,5 +1,4 @@
 import express from "express";
-import { FeatureType } from "openskidata-format";
 import * as path from "path";
 import * as config from "./Config";
 import { async } from "./Middleware";
@@ -56,27 +55,14 @@ const port = 3000;
       }
 
       let limit = 10;
-
-      const skiAreas: GeoJSON.Feature[] = await repository.search(
+      
+      // Use the consolidated search that prioritizes by feature type
+      const results: GeoJSON.Feature[] = await repository.search(
         text,
-        FeatureType.SkiArea,
         limit
       );
 
-      let lifts: GeoJSON.Feature[] = [];
-      let runs: GeoJSON.Feature[] = [];
-
-      limit -= skiAreas.length;
-      if (limit > 0) {
-        lifts = await repository.search(text, FeatureType.Lift, limit);
-      }
-
-      limit -= lifts.length;
-      if (limit > 0) {
-        runs = await repository.search(text, FeatureType.Run, limit);
-      }
-
-      res.send(skiAreas.concat(lifts, runs));
+      res.send(results);
     })
   );
 

@@ -32,14 +32,19 @@ export class Repository {
 
   search = async (
     text: string,
-    type: FeatureType,
     limit: number
   ): Promise<(RunFeature | LiftFeature | SkiAreaFeature)[]> => {
     const query = arangojs.aql`
     FOR feature IN ${this.collection}
     OPTIONS { indexHint: "textSearch_v2", forceIndexHint: true }
     FILTER TOKENS(${text}, "en_edge_ngram_v2") ALL == feature.searchableText 
-    AND feature.type == ${type}
+    LET nameScore = LOWER(feature.properties.name) == LOWER(${text}) ? 3 : 
+                    STARTS_WITH(LOWER(feature.properties.name), LOWER(${text})) ? 2 : 
+                    CONTAINS(LOWER(feature.properties.name), LOWER(${text})) ? 1 : 0
+    LET typeScore = feature.type == "skiArea" ? 3 :
+                   feature.type == "lift" ? 2 :
+                   feature.type == "run" ? 1 : 0
+    SORT nameScore DESC, typeScore DESC
     LIMIT ${limit}
     RETURN feature
     `
