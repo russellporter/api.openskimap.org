@@ -4,7 +4,8 @@ import {
   FeatureType,
   LiftFeature,
   RunFeature,
-  SkiAreaFeature
+  SkiAreaFeature,
+  SkiAreaSummaryFeature
 } from "openskidata-format";
 import * as Config from "./Config";
 
@@ -100,9 +101,22 @@ export class Repository {
   };
 }
 
-function getSearchableText(feature: RunFeature | LiftFeature | SkiAreaFeature): string[] {
-  const location = feature.properties.type == FeatureType.SkiArea ? feature.properties.location : null;
-  return [feature.properties.name, location?.localized.en.locality, location?.localized.en.region, location?.localized.en.country].filter((v): v is string => !!v)
+function getSearchableText(feature: RunFeature | LiftFeature | SkiAreaFeature | SkiAreaSummaryFeature): string[] {
+  let searchableText: (string | undefined | null)[] = [feature.properties.name];
+
+  switch (feature.properties.type) {
+    case FeatureType.Lift:
+    case FeatureType.Run:
+      feature.properties.skiAreas.forEach(skiArea => {
+        searchableText.push(...getSearchableText(skiArea))  
+      });
+      break;
+    case FeatureType.SkiArea:
+      searchableText.push(feature.properties.location?.localized.en.locality);
+      break;
+  }
+  
+  return [...new Set(searchableText.filter((v): v is string => !!v))];
 }
 
 function documentToFeature(document: any): any {
