@@ -10,7 +10,7 @@ services:
       - .:/home/node/app
     ports:
       - 3000:3000
-    command: 'sh -c "sleep 5 && npm run start"'
+    command: 'sh -c "sleep 5 && npm run build && npm run start"'
     networks:
       - db
     depends_on:

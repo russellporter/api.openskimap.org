@@ -24,7 +24,7 @@
   "scripts": {
     "import-data": "node -r ts-node/register src/scripts/import_data.ts",
     "drop-database": "node -r ts-node/register src/scripts/drop_database.ts",
-    "postinstall": "tsc -p .",
+    "build": "tsc -p .",
     "watch": "tsc -w -p .",
     "debug": "nodemon --watch ./dist --inspect=0.0.0.0:9222 --nolazy ./dist/index.js",
     "docker-debug": "docker-compose up",
