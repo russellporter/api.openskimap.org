@@ -110,18 +110,18 @@ export class Repository {
 function getSearchableText(feature: RunFeature | LiftFeature | SkiAreaFeature | SkiAreaSummaryFeature): string[] {
   let searchableText: (string | undefined | null)[] = [feature.properties.name];
 
-  switch (feature.properties.type) {
-    case FeatureType.Lift:
-    case FeatureType.Run:
-      feature.properties.skiAreas.forEach(skiArea => {
-        searchableText.push(...getSearchableText(skiArea))  
-      });
-      break;
-    case FeatureType.SkiArea:
-      searchableText.push(feature.properties.location?.localized.en.locality);
-      break;
+  if ('places' in feature.properties) {
+    feature.properties.places.forEach(place => {
+      searchableText.push(place.localized.en.locality);
+    });
   }
-  
+
+  if (feature.properties.type == FeatureType.Lift || feature.properties.type == FeatureType.Run) {
+    feature.properties.skiAreas.forEach(skiArea => {
+      searchableText.push(...getSearchableText(skiArea))  
+    });
+  }
+
   return [...new Set(searchableText.filter((v): v is string => !!v))];
 }
 
