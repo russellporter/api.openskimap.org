@@ -1,15 +1,15 @@
 services:
   app:
-    image: "node:20"
-    user: "node"
-    working_dir: /home/node/app
+    build:
+      context: .
+      target: development
     environment:
-      - NODE_ENV=production
       - ARANGODB_URL=http://arangodb:8529/
     volumes:
-      - .:/home/node/app
+      - .:/app
     ports:
       - 3000:3000
+      - 9222:9222
     command: 'sh -c "sleep 5 && npm run build && npm run start"'
     networks:
       - db
