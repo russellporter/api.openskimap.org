@@ -23,8 +23,8 @@
     "typescript": "^5"
   },
   "scripts": {
-    "import-data": "[ \"$NODE_ENV\" = \"production\" ] && node dist/scripts/import_data.js \"$@\" || node -r ts-node/register src/scripts/import_data.ts \"$@\"",
-    "drop-database": "[ \"$NODE_ENV\" = \"production\" ] && node dist/scripts/drop_database.js \"$@\" || node -r ts-node/register src/scripts/drop_database.ts \"$@\"",
+    "import-data": "./scripts/import-data.sh",
+    "drop-database": "./scripts/drop-database.sh",
     "build": "tsc -p .",
     "watch": "tsc -w -p .",
     "debug": "nodemon --watch ./dist --inspect=0.0.0.0:9222 --nolazy ./dist/index.js",
