@@ -1,14 +1,17 @@
 # OpenSkiMap API - Dev Commands & Style Guide
 
-## Build & Run Commands
+## Development Workflow
 
-- `npm run build` - Compile TypeScript
-- `npm run watch` - Watch TypeScript files for changes
-- `npm run start` - Start the server
-- `npm run check-types` - Check TypeScript types
-- `npm run import-data` - Import ski data from import/ directory
-- `npm run drop-database` - Drop the database
-- `npm run docker-debug` - Run in debug mode with Docker
+All commands should be run inside the Docker container.
+
+### Useful commands
+- `docker compose up` - Start services (app + database) in development mode (with file watching)
+- `docker compose exec app npm run build` - Compile TypeScript
+- `docker compose exec app npm run check-types` - Check TypeScript types
+- `docker compose exec app npm run import-data import/ski_areas.geojson` - Import ski data
+- `docker compose exec app npm run drop-database` - Drop the database
+- `docker compose run --rm app npm install` - Install dependencies
+- `docker compose exec app sh` - Get a shell inside the app container, then run commands directly
 
 ## Code Style Guidelines
 
@@ -18,12 +21,13 @@
 - **Error Handling**: Use try/catch blocks with specific error types
 - **Async Code**: Use async/await pattern consistently
 - **Formatting**: 2-space indentation, no semicolons
-- **Database Operations**: Use AQL template strings with parameterization
+- **Database Operations**: Use parameterized SQL queries with pg.Pool
 - **File Organization**: One class/component per file, named after its contents
 
 ## Architecture
 
 - Express.js web server with TypeScript
-- ArangoDB for data storage with arangojs as client
-- GeoJSON as primary data format
+- PostgreSQL for data storage with pg (node-postgres) client
+- GeoJSON stored as JSONB in PostgreSQL
 - Repository pattern for database operations
+- pg_trgm extension for fuzzy text search

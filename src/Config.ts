@@ -1,7 +1,9 @@
-export const arangodb = {
-  url: process.env.ARANGODB_URL || "http://localhost:8529",
-  database: process.env.ARANGODB_DATABASE || "openskimap",
-  featuresCollection: "features",
+export const postgres = {
+  host: process.env.POSTGRES_HOST || "localhost",
+  user: process.env.POSTGRES_USER || "postgres",
+  password: process.env.POSTGRES_PASSWORD || "postgres",
+  database: process.env.POSTGRES_DB || "openskimap",
+  port: parseInt(process.env.POSTGRES_PORT || "5432"),
 };
 
 export const frontend = {

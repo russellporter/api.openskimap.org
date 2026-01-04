@@ -4,7 +4,10 @@ services:
       context: .
       target: development
     environment:
-      - ARANGODB_URL=http://arangodb:8529/
+      - POSTGRES_HOST=postgres
+      - POSTGRES_USER=openskimap
+      - POSTGRES_PASSWORD=openskimap_dev
+      - POSTGRES_DB=openskimap
     volumes:
       - .:/app
     ports:
@@ -14,14 +17,29 @@ services:
     networks:
       - db
     depends_on:
-      - arangodb
-  arangodb:
-    image: arangodb:3.12.1
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
     ports:
-      - 8529:8529
+      - 5433:5432
     environment:
-      - ARANGO_NO_AUTH=1d
+      - POSTGRES_USER=openskimap
+      - POSTGRES_PASSWORD=openskimap_dev
+      - POSTGRES_DB=openskimap
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openskimap"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 networks:
   db:
+
+volumes:
+  postgres_data:

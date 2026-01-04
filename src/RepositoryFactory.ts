@@ -1,54 +1,49 @@
-import * as arangojs from "arangojs";
+import { Pool } from "pg";
 import * as Config from "./Config";
 import { Repository } from "./Repository";
 
 export default async function getRepository(): Promise<Repository> {
-  const client = new arangojs.Database(Config.arangodb.url);
+  const pool = new Pool({
+    host: Config.postgres.host,
+    user: Config.postgres.user,
+    password: Config.postgres.password,
+    database: Config.postgres.database,
+    port: Config.postgres.port,
+    max: 20,
+  });
 
-  try {
-    await client.createDatabase(Config.arangodb.database);
-  } catch (_) {}
+  // Ensure pg_trgm extension is installed
+  await pool.query("CREATE EXTENSION IF NOT EXISTS pg_trgm");
 
+  // Create table if not exists
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS features (
+      id VARCHAR(255) PRIMARY KEY,
+      type VARCHAR(20) NOT NULL CHECK (type IN ('skiArea', 'lift', 'run')),
+      searchable_text TEXT NOT NULL,
+      geometry JSONB NOT NULL,
+      properties JSONB NOT NULL,
+      import_id UUID NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    )
+  `);
 
-  client.database(Config.arangodb.database);
+  // Create indexes if not exist
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_features_type ON features(type)
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_features_import_id ON features(import_id)
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_features_searchable_text_trgm
+    ON features USING GIN(searchable_text gin_trgm_ops)
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_features_name
+    ON features((properties->>'name'))
+  `);
 
-  await client.createAnalyzer('en_edge_ngram_v2', {
-    type: 'text',
-    properties: {
-      locale: 'en',
-      accent: false,
-      case: 'lower',
-      stemming: false,
-      edgeNgram: {
-        min: 3,
-        max: 20,
-        preserveOriginal: true
-      }
-    }
-  })
-
-  const featuresCollection = client.collection(
-    Config.arangodb.featuresCollection
-  );
-  try {
-    await featuresCollection.create();
-  } catch (_) {}
-  await featuresCollection.ensureIndex({type: "persistent", fields: ["type"]})
-  await featuresCollection.ensureIndex({type: "geo", fields: ["geometry"], geoJson: true})
-  await featuresCollection.ensureIndex({
-    type: 'inverted',
-    name: 'textSearch_v2',
-    fields: [{name: 'searchableText[*]', analyzer: 'en_edge_ngram_v2'}, {name: 'type'}]
-  })
-
-  const view = await client.view('textSearch');
-  const viewExists = await view.exists();
-  if (!viewExists) {
-    await client.createView(
-      'textSearch',
-      {type: "search-alias", indexes: [{collection: featuresCollection.name, index: 'textSearch'}]}
-    );
-  }
-
-  return new Repository(client);
+  return new Repository(pool);
 }

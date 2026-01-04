@@ -1,5 +1,4 @@
-import * as arangojs from "arangojs";
-import * as arangojsCollection from "arangojs/collection";
+import { Pool } from "pg";
 import {
   FeatureType,
   LiftFeature,
@@ -7,107 +6,115 @@ import {
   SkiAreaFeature,
   SkiAreaSummaryFeature
 } from "openskidata-format";
-import * as Config from "./Config";
 
 export class Repository {
-  private database: arangojs.Database;
-  private collection: arangojsCollection.DocumentCollection<any, any>;
+  private pool: Pool;
 
-  constructor(database: arangojs.Database) {
-    this.database = database;
-    this.collection = database.collection(Config.arangodb.featuresCollection);
+  constructor(pool: Pool) {
+    this.pool = pool;
   }
 
   has = async (id: string): Promise<boolean> => {
-    return await this.collection.documentExists({ _key: id });
+    const result = await this.pool.query(
+      "SELECT EXISTS(SELECT 1 FROM features WHERE id = $1) as exists",
+      [id]
+    );
+    return result.rows[0].exists;
   };
 
   get = async (
     id: string
   ): Promise<RunFeature | LiftFeature | SkiAreaFeature> => {
-    const document = await this.collection.document({ _key: id });
+    const result = await this.pool.query(
+      `SELECT id, type, geometry, properties
+       FROM features
+       WHERE id = $1`,
+      [id]
+    );
 
-    return documentToFeature(document);
+    if (result.rows.length === 0) {
+      throw new Error(`Feature ${id} not found`);
+    }
+
+    return rowToFeature(result.rows[0]);
   };
 
   search = async (
     text: string,
     limit: number
   ): Promise<(RunFeature | LiftFeature | SkiAreaFeature)[]> => {
-    const query = arangojs.aql`
-    FOR feature IN ${this.collection}
-    OPTIONS { indexHint: "textSearch_v2", forceIndexHint: true }
-    FILTER TOKENS(${text}, "en_edge_ngram_v2") ALL == feature.searchableText 
-    LET nameScore = LOWER(feature.properties.name) == LOWER(${text}) ? 3 :
-                    STARTS_WITH(LOWER(feature.properties.name), LOWER(${text})) ? 2 :
-                    CONTAINS(LOWER(feature.properties.name), LOWER(${text})) ? 1 : 0
-    LET typeScore = feature.type == "skiArea" ? 3 :
-                   feature.type == "lift" ? 2 :
-                   feature.type == "run" ? 1 : 0
-    LET combinedScore = typeScore * 10 + nameScore
-    SORT combinedScore DESC
-    LIMIT ${limit}
-    RETURN feature
-    `
-    const cursor = await this.database.query(query);
-    return await cursor
-      .all()
-      .then((results: any[]) => results.map(documentToFeature));
+    const searchLower = text.toLowerCase();
+
+    const result = await this.pool.query(
+      `WITH scored_features AS (
+         SELECT
+           id,
+           type,
+           geometry,
+           properties,
+           CASE
+             WHEN LOWER(properties->>'name') = $1 THEN 3
+             WHEN LOWER(properties->>'name') LIKE $1 || '%' THEN 2
+             WHEN LOWER(properties->>'name') LIKE '%' || $1 || '%' THEN 1
+             ELSE 0
+           END AS name_score,
+           CASE
+             WHEN type = 'skiArea' THEN 3
+             WHEN type = 'lift' THEN 2
+             WHEN type = 'run' THEN 1
+             ELSE 0
+           END AS type_score
+         FROM features
+         WHERE searchable_text % $1
+       )
+       SELECT id, type, geometry, properties, name_score, type_score
+       FROM scored_features
+       ORDER BY (type_score * 10 + name_score) DESC
+       LIMIT $2`,
+      [searchLower, limit]
+    );
+
+    return result.rows.map(rowToFeature);
   };
 
   removeExceptImport = async (importID: string): Promise<void> => {
-    await this.database.query(arangojs.aql`
-    FOR feature IN ${this.collection}
-    FILTER feature.importID != ${importID}
-    REMOVE feature IN ${this.collection}
-    OPTIONS { exclusive: true }
-    `);
+    await this.pool.query(
+      "DELETE FROM features WHERE import_id != $1",
+      [importID]
+    );
   };
 
   upsert = async (
     feature: LiftFeature | RunFeature | SkiAreaFeature,
     importID: string
   ): Promise<void> => {
-    await this.upsertData(
-      feature.properties.id,
-      feature,
-      importID
-    );
-  };
-
-  private upsertData = async (
-    id: string,
-    feature: RunFeature | LiftFeature | SkiAreaFeature,
-    importID: string
-  ): Promise<void> => {
+    const id = feature.properties.id;
     const searchableText = getSearchableText(feature);
-    await this.database.query(arangojs.aql`
-      UPSERT { _key: ${id} }
-      INSERT 
-        {
-          _key: ${id},
-          type: ${feature.properties.type},
-          searchableText: ${searchableText},
-          geometry: ${feature.geometry},
-          properties: ${feature.properties},
-          importID: ${importID}
-        } 
-      UPDATE
-        {
-          _key: ${id},
-          type: ${feature.properties.type},
-          searchableText: ${searchableText},
-          geometry: ${feature.geometry},
-          properties: ${feature.properties},
-          importID: ${importID}
-        } 
-      IN ${this.collection}
-      OPTIONS { exclusive: true }
-      `);
+
+    await this.pool.query(
+      `INSERT INTO features (id, type, searchable_text, geometry, properties, import_id)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (id)
+       DO UPDATE SET
+         type = EXCLUDED.type,
+         searchable_text = EXCLUDED.searchable_text,
+         geometry = EXCLUDED.geometry,
+         properties = EXCLUDED.properties,
+         import_id = EXCLUDED.import_id,
+         updated_at = NOW()`,
+      [
+        id,
+        feature.properties.type,
+        searchableText,
+        JSON.stringify(feature.geometry),
+        JSON.stringify(feature.properties),
+        importID
+      ]
+    );
   };
 }
 
-function getSearchableText(feature: RunFeature | LiftFeature | SkiAreaFeature | SkiAreaSummaryFeature): string[] {
+function getSearchableText(feature: RunFeature | LiftFeature | SkiAreaFeature | SkiAreaSummaryFeature): string {
   let searchableText: (string | undefined | null)[] = [feature.properties.name];
 
   if ('places' in feature.properties) {
@@ -118,17 +125,17 @@ function getSearchableText(feature: RunFeature | LiftFeature | SkiAreaFeature | 
 
   if (feature.properties.type == FeatureType.Lift || feature.properties.type == FeatureType.Run) {
     feature.properties.skiAreas.forEach(skiArea => {
-      searchableText.push(...getSearchableText(skiArea))  
+      searchableText.push(getSearchableText(skiArea))
     });
   }
 
-  return [...new Set(searchableText.filter((v): v is string => !!v))];
+  return [...new Set(searchableText.filter((v): v is string => !!v))].join(' ');
 }
 
-function documentToFeature(document: any): any {
+function rowToFeature(row: any): any {
   return {
     type: "Feature",
-    properties: document.properties,
-    geometry: document.geometry,
+    properties: row.properties,
+    geometry: row.geometry,
   };
 }
