@@ -131,6 +131,41 @@ describe('GET /search', () => {
       `)
     })
 
+    it('returns relevant results for an alternate place search', async () => {
+      const response = await request(app)
+        .get('/search?query=Garmisch%20Partenkirchen')
+        .expect(200)
+
+      const names = response.body.map((f: any) => f.properties.name)
+      expect(names).toMatchInlineSnapshot(`
+        [
+          "Skigebiet Garmisch-Classic",
+          "Garmisch Loipen",
+          "Skigebiet Eckbauer",
+          "Hausbergbahn",
+          "Kreuzjochlift",
+          "Kreuzeckbahn",
+          "Graseckbahn",
+          "Alpspitzbahn",
+          "Mittlerer Skiweg",
+          "Kreuzwankl-Umfahrung",
+        ]
+      `)
+    })
+
+    it('returns relevant results for a second word match', async () => {
+      const response = await request(app)
+        .get('/search?query=Skiweg')
+        .expect(200)
+
+      const names = response.body.map((f: any) => f.properties.name)
+      expect(names).toMatchInlineSnapshot(`
+        [
+          "Mittlerer Skiweg",
+        ]
+      `)
+    });
+
     it('returns empty array for no matches', async () => {
       const response = await request(app)
         .get('/search?query=NonexistentSkiArea12345')
