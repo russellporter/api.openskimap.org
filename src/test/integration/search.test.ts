@@ -83,9 +83,9 @@ describe('GET /search', () => {
       expect(names).toMatchInlineSnapshot(`
         [
           "Alpspitzbahn",
+          "Skigebiet Garmisch-Classic",
           "Garmisch Loipen",
           "Skigebiet Eckbauer",
-          "Skigebiet Garmisch-Classic",
           "Kreuzeckbahn",
           "Graseckbahn",
           "Hausbergbahn",
@@ -117,14 +117,14 @@ describe('GET /search', () => {
       const names = response.body.map((f: any) => f.properties.name)
       expect(names).toMatchInlineSnapshot(`
         [
+          "Skigebiet Garmisch-Classic",
           "Garmisch Loipen",
           "Skigebiet Eckbauer",
-          "Skigebiet Garmisch-Classic",
-          "Graseckbahn",
-          "Alpspitzbahn",
-          "Kreuzeckbahn",
           "Hausbergbahn",
           "Kreuzjochlift",
+          "Kreuzeckbahn",
+          "Graseckbahn",
+          "Alpspitzbahn",
           "Mittlerer Skiweg",
           "Kreuzwankl-Umfahrung",
         ]
@@ -218,6 +218,53 @@ describe('GET /search', () => {
       expect(feature.geometry.coordinates).toBeDefined()
       expect(feature.properties).toBeDefined()
       expect(feature.properties.type).toBeDefined()
+    })
+  })
+
+  describe('Rank weighting', () => {
+    it('uses run length as tiebreaker when name matches are similar', async () => {
+      // For place searches, both ski areas match similarly (both contain the place)
+      // so rank (based on run length) becomes the tiebreaker
+      const response = await request(app)
+        .get('/search?query=Garmisch-Partenkirchen')
+        .expect(200)
+
+      expect(response.body.length).toBeGreaterThan(0)
+
+      // Get the ski area results
+      const skiAreas = response.body.filter((f: any) => f.properties.type === 'skiArea')
+      const classicIndex = skiAreas.findIndex((f: any) => f.properties.name === 'Skigebiet Garmisch-Classic')
+      const loipenIndex = skiAreas.findIndex((f: any) => f.properties.name === 'Garmisch Loipen')
+
+      // Both should be found
+      expect(classicIndex).toBeGreaterThanOrEqual(0)
+      expect(loipenIndex).toBeGreaterThanOrEqual(0)
+
+      // Classic has ~35.6km of runs vs Loipen's ~14.3km
+      // When name matching is similar, Classic ranks higher due to greater run length
+      expect(classicIndex).toBeLessThan(loipenIndex)
+    })
+
+    it('still prioritizes name prefix matches over run length', async () => {
+      // Both match "Garmisch" at word boundaries (both get boundary_bonus=20)
+      // But "Garmisch Loipen" starts with "Garmisch" (name_score=2)
+      // while "Skigebiet Garmisch-Classic" has "Garmisch" later in name (name_score=1)
+      // Despite Classic having more run length, name position takes priority
+      const response = await request(app)
+        .get('/search?query=Garmisch')
+        .expect(200)
+
+      const skiAreas = response.body.filter((f: any) => f.properties.type === 'skiArea')
+      const classicIndex = skiAreas.findIndex((f: any) => f.properties.name === 'Skigebiet Garmisch-Classic')
+      const loipenIndex = skiAreas.findIndex((f: any) => f.properties.name === 'Garmisch Loipen')
+
+      // Both should be found
+      expect(classicIndex).toBeGreaterThanOrEqual(0)
+      expect(loipenIndex).toBeGreaterThanOrEqual(0)
+
+      // Loipen should rank higher due to better name match, confirming that
+      // name matching is still more important than run length
+      expect(loipenIndex).toBeLessThan(classicIndex)
     })
   })
 })

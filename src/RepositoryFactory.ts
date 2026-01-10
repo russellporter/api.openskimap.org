@@ -24,6 +24,7 @@ export default async function getRepository(databaseName?: string): Promise<Repo
       searchable_text_ts tsvector,
       geometry JSONB NOT NULL,
       properties JSONB NOT NULL,
+      rank DECIMAL NOT NULL DEFAULT 0,
       import_id UUID NOT NULL,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -55,6 +56,12 @@ export default async function getRepository(databaseName?: string): Promise<Repo
     UPDATE features
     SET searchable_text_ts = to_tsvector('simple', searchable_text)
     WHERE searchable_text_ts IS NULL
+  `);
+
+  // Add rank column if it doesn't exist (migration)
+  await pool.query(`
+    ALTER TABLE features
+    ADD COLUMN IF NOT EXISTS rank DECIMAL NOT NULL DEFAULT 0
   `);
 
   return new Repository(pool);

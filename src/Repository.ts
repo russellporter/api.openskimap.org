@@ -1,4 +1,3 @@
-import { Pool } from "pg";
 import {
   FeatureType,
   LiftFeature,
@@ -6,6 +5,8 @@ import {
   SkiAreaFeature,
   SkiAreaSummaryFeature
 } from "openskidata-format";
+import { Pool } from "pg";
+import { calculateRank } from "./RankCalculator";
 
 export class Repository {
   private pool: Pool;
@@ -58,6 +59,7 @@ export class Repository {
            type,
            geometry,
            properties,
+           rank,
            CASE
              WHEN LOWER(properties->>'name') = $1 THEN 3
              WHEN LOWER(properties->>'name') LIKE $1 || '%' THEN 2
@@ -81,6 +83,7 @@ export class Repository {
            type,
            geometry,
            properties,
+           rank,
            CASE
              WHEN LOWER(properties->>'name') = $1 THEN 3
              WHEN LOWER(properties->>'name') LIKE $1 || '%' THEN 2
@@ -105,7 +108,7 @@ export class Repository {
        )
        SELECT id, type, geometry, properties
        FROM combined_results
-       ORDER BY (type_score * 10 + name_score + boundary_bonus) DESC
+       ORDER BY (type_score * 10 + name_score + boundary_bonus + rank) DESC
        LIMIT $3`,
       [searchLower, tsquery, limit]
     );
@@ -126,10 +129,11 @@ export class Repository {
   ): Promise<void> => {
     const id = feature.properties.id;
     const searchableText = getSearchableText(feature);
+    const rank = calculateRank(feature);
 
     await this.pool.query(
-      `INSERT INTO features (id, type, searchable_text, searchable_text_ts, geometry, properties, import_id)
-       VALUES ($1, $2, $3, to_tsvector('simple', $3), $4, $5, $6)
+      `INSERT INTO features (id, type, searchable_text, searchable_text_ts, geometry, properties, rank, import_id)
+       VALUES ($1, $2, $3, to_tsvector('simple', $3), $4, $5, $6, $7)
        ON CONFLICT (id)
        DO UPDATE SET
          type = EXCLUDED.type,
@@ -137,6 +141,7 @@ export class Repository {
          searchable_text_ts = EXCLUDED.searchable_text_ts,
          geometry = EXCLUDED.geometry,
          properties = EXCLUDED.properties,
+         rank = EXCLUDED.rank,
          import_id = EXCLUDED.import_id,
          updated_at = NOW()`,
       [
@@ -145,6 +150,7 @@ export class Repository {
         searchableText,
         JSON.stringify(feature.geometry),
         JSON.stringify(feature.properties),
+        rank,
         importID
       ]
     );
