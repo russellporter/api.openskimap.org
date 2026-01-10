@@ -26,3 +26,18 @@ jobs:
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Start services
+        run: docker compose up -d
+
+      - name: Wait for services to be healthy
+        run: |
+          echo "Waiting for database to be ready..."
+          timeout 30 sh -c 'until docker compose exec -T postgres pg_isready -U openskimap; do sleep 1; done'
+
+      - name: Run tests
+        run: docker compose exec -T app npm test
+
+      - name: Stop services
+        if: always()
+        run: docker compose down
