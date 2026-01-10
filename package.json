@@ -19,12 +19,12 @@
     "@types/stream-to-promise": "^2.2.0",
     "@types/supertest": "^6.0.2",
     "@types/uuid": "^10",
-    "@vitest/ui": "^1.2.0",
+    "@vitest/ui": "^4.0.0",
     "prettier": "^3",
     "supertest": "^6.3.4",
     "ts-node": "^10",
     "typescript": "^5",
-    "vitest": "^1.2.0"
+    "vitest": "^4.0.0"
   },
   "scripts": {
     "import-data": "./scripts/import-data.sh",
