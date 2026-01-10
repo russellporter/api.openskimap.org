@@ -17,10 +17,14 @@
     "@types/pg": "^8.11.0",
     "@types/geojson": "^7946.0.14",
     "@types/stream-to-promise": "^2.2.0",
+    "@types/supertest": "^6.0.2",
     "@types/uuid": "^10",
+    "@vitest/ui": "^1.2.0",
     "prettier": "^3",
+    "supertest": "^6.3.4",
     "ts-node": "^10",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^1.2.0"
   },
   "scripts": {
     "import-data": "./scripts/import-data.sh",
@@ -30,7 +34,10 @@
     "debug": "nodemon --watch ./dist --inspect=0.0.0.0:9222 --nolazy ./dist/index.js",
     "docker-debug": "docker-compose up",
     "start": "node ./dist/index.js",
-    "check-types": "tsc"
+    "check-types": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "author": "Russell Porter",
   "license": "ISC"
