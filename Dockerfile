@@ -9,11 +9,18 @@ COPY package*.json ./
 # Development stage
 FROM base AS development
 
+# Copy entrypoint script
+COPY docker-entrypoint-dev.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint-dev.sh
+
 # Expose port and debug port
 EXPOSE 3000 9222
 
 # Set environment variables
 ENV NODE_ENV=development
+
+# Set entrypoint
+ENTRYPOINT ["docker-entrypoint-dev.sh"]
 
 # Start with watch mode
 CMD ["sh", "-c", "npm run build && npm run start"]
