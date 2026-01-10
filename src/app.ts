@@ -7,6 +7,12 @@ import { Repository } from "./Repository"
 export function createApp(repository: Repository) {
   const app = express()
 
+  app.use(function (_, res, next) {
+    res.header("Access-Control-Allow-Methods", "GET")
+    res.header("Access-Control-Allow-Origin", "*")
+    next()
+  })
+
   app.get("/index.html", async (req, res) => {
     if (req.query.obj && typeof req.query.obj === "string") {
       try {
@@ -28,12 +34,6 @@ export function createApp(repository: Repository) {
     }
 
     res.sendFile(path.join(frontendPath, "index.html"))
-  })
-
-  app.get("/*", function (_, res, next) {
-    res.header("Access-Control-Allow-Methods", "GET")
-    res.header("Access-Control-Allow-Origin", "*")
-    next()
   })
 
   app.get(
@@ -61,7 +61,7 @@ export function createApp(repository: Repository) {
     "/features/:id.geojson",
     async(async (req, res) => {
       try {
-        const feature = await repository.get(req.params.id)
+        const feature = await repository.get(req.params.id as string)
         res.send(feature)
       } catch (error) {
         res.sendStatus(404)
