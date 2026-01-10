@@ -6,7 +6,19 @@
         "id": "026d5a169c2bac6e2769b5a3ac2ea2b83050cd54",
         "name": "Garmisch Loipen",
         "type": "skiArea",
-        "places": [],
+        "places": [
+          {
+            "iso3166_2": "DE-BY",
+            "localized": {
+              "en": {
+                "region": "Bavaria",
+                "country": "Germany",
+                "locality": "Garmisch-Partenkirchen"
+              }
+            },
+            "iso3166_1Alpha2": "DE"
+          }
+        ],
         "status": "operating",
         "sources": [{ "id": 17721, "type": "skimap.org" }],
         "websites": [
@@ -49,7 +61,19 @@
         "id": "0b395320dd2d9187318380c69a466cde38e6b708",
         "name": "Skigebiet Eckbauer",
         "type": "skiArea",
-        "places": [],
+        "places": [
+          {
+            "iso3166_2": "DE-BY",
+            "localized": {
+              "en": {
+                "region": "Bavaria",
+                "country": "Germany",
+                "locality": "Garmisch-Partenkirchen"
+              }
+            },
+            "iso3166_1Alpha2": "DE"
+          }
+        ],
         "status": "operating",
         "sources": [
           { "id": "relation/18842506", "type": "openstreetmap" },
@@ -119,7 +143,19 @@
         "id": "fa473fa12ab6059b9e93af8498afa0efdea2cff6",
         "name": "Skigebiet Garmisch-Classic",
         "type": "skiArea",
-        "places": [],
+        "places": [
+          {
+            "iso3166_2": "DE-BY",
+            "localized": {
+              "en": {
+                "region": "Bavaria",
+                "country": "Germany",
+                "locality": "Garmisch-Partenkirchen"
+              }
+            },
+            "iso3166_1Alpha2": "DE"
+          }
+        ],
         "status": "operating",
         "sources": [
           { "id": "relation/18842423", "type": "openstreetmap" },

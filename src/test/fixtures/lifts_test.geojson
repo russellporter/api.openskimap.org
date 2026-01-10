@@ -22,7 +22,19 @@
         "sources": [{ "type": "openstreetmap", "id": "way/23943074" }],
         "websites": [],
         "wikidataID": "Q1543423",
-        "places": [],
+        "places": [
+          {
+            "iso3166_2": "DE-BY",
+            "localized": {
+              "en": {
+                "region": "Bavaria",
+                "country": "Germany",
+                "locality": "Garmisch-Partenkirchen"
+              }
+            },
+            "iso3166_1Alpha2": "DE"
+          }
+        ],
         "id": "78edbd0c1f389ac0becf97213527fe3d32b91e92"
       },
       "geometry": {
@@ -70,7 +82,19 @@
         "sources": [{ "type": "openstreetmap", "id": "way/23948552" }],
         "websites": ["https://zugspitze.de"],
         "wikidataID": "Q2651340",
-        "places": [],
+        "places": [
+          {
+            "iso3166_2": "DE-BY",
+            "localized": {
+              "en": {
+                "region": "Bavaria",
+                "country": "Germany",
+                "locality": "Garmisch-Partenkirchen"
+              }
+            },
+            "iso3166_1Alpha2": "DE"
+          }
+        ],
         "id": "22a9eee33e861ff7e36f30d66ab0ffe9f160c459"
       },
       "geometry": {
@@ -120,7 +144,19 @@
         "sources": [{ "type": "openstreetmap", "id": "way/23948696" }],
         "websites": ["https://zugspitze.de"],
         "wikidataID": "Q1788228",
-        "places": [],
+        "places": [
+          {
+            "iso3166_2": "DE-BY",
+            "localized": {
+              "en": {
+                "region": "Bavaria",
+                "country": "Germany",
+                "locality": "Garmisch-Partenkirchen"
+              }
+            },
+            "iso3166_1Alpha2": "DE"
+          }
+        ],
         "id": "197a6ddd93d3b02380cb272c239ca29b9b4b652d"
       },
       "geometry": {
@@ -170,7 +206,19 @@
         "sources": [{ "type": "openstreetmap", "id": "way/24952444" }],
         "websites": ["http://www.zugspitzbahn.de"],
         "wikidataID": "Q1591018",
-        "places": [],
+        "places": [
+          {
+            "iso3166_2": "DE-BY",
+            "localized": {
+              "en": {
+                "region": "Bavaria",
+                "country": "Germany",
+                "locality": "Garmisch-Partenkirchen"
+              }
+            },
+            "iso3166_1Alpha2": "DE"
+          }
+        ],
         "id": "51711743013a99bd53ec44aee098e4ff33e4fc8b"
       },
       "geometry": {
@@ -228,7 +276,19 @@
         "sources": [{ "type": "openstreetmap", "id": "way/176623839" }],
         "websites": [],
         "wikidataID": null,
-        "places": [],
+        "places": [
+          {
+            "iso3166_2": "DE-BY",
+            "localized": {
+              "en": {
+                "region": "Bavaria",
+                "country": "Germany",
+                "locality": "Garmisch-Partenkirchen"
+              }
+            },
+            "iso3166_1Alpha2": "DE"
+          }
+        ],
         "id": "a9cb1def8a0b2b2c84038db2d60b3e09bc35d3ac"
       },
       "geometry": {

@@ -73,7 +73,7 @@ describe('GET /search', () => {
         expect(firstLiftIndex).toBeLessThan(firstRunIndex)
     })
 
-    it('returns results for a single character, and limits to to 10', async () => {
+    it('returns relevant results for a single character, and limits to to 10', async () => {
       const response = await request(app)
         .get('/search?query=a')
         .expect(200)
@@ -84,14 +84,49 @@ describe('GET /search', () => {
         [
           "Alpspitzbahn",
           "Garmisch Loipen",
-          "Skigebiet Garmisch-Classic",
           "Skigebiet Eckbauer",
+          "Skigebiet Garmisch-Classic",
           "Kreuzeckbahn",
           "Graseckbahn",
           "Hausbergbahn",
+          "Kreuzjochlift",
           "Kreuzwankl-Umfahrung",
+          "Mittlerer Skiweg",
+        ]
+      `)
+    })
+
+    it('returns relevant results for a two characters', async () => {
+      const response = await request(app)
+        .get('/search?query=al')
+        .expect(200)
+
+      const names = response.body.map((f: any) => f.properties.name)
+      expect(names).toMatchInlineSnapshot(`
+        [
+          "Alpspitzbahn",
+        ]
+      `)
+    })
+
+    it('returns relevant results for a place search', async () => {
+      const response = await request(app)
+        .get('/search?query=Garmisch-Partenkirchen')
+        .expect(200)
+
+      const names = response.body.map((f: any) => f.properties.name)
+      expect(names).toMatchInlineSnapshot(`
+        [
+          "Garmisch Loipen",
+          "Skigebiet Eckbauer",
+          "Skigebiet Garmisch-Classic",
+          "Graseckbahn",
+          "Alpspitzbahn",
+          "Kreuzeckbahn",
+          "Hausbergbahn",
           "Kreuzjochlift",
           "Mittlerer Skiweg",
+          "Kreuzwankl-Umfahrung",
         ]
       `)
     })
@@ -118,6 +153,24 @@ describe('GET /search', () => {
         .expect(200)
 
       expect(response.body.length).toBeGreaterThan(0)
+    })
+
+    it('prefers word-start matches over word-middle matches', async () => {
+      const response = await request(app)
+        .get('/search?query=eck')
+        .expect(200)
+
+      const names = response.body.map((f: any) => f.properties.name)
+
+      // "Eckbauer" (word start) should rank higher than
+      // "Graseckbahn" or "Kreuzeckbahn" (word middle)
+      expect(names).toMatchInlineSnapshot(`
+        [
+          "Skigebiet Eckbauer",
+          "Graseckbahn",
+          "Kreuzeckbahn",
+        ]
+      `)
     })
   })
 

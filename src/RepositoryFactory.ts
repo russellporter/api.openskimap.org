@@ -21,6 +21,7 @@ export default async function getRepository(databaseName?: string): Promise<Repo
       id VARCHAR(255) PRIMARY KEY,
       type VARCHAR(20) NOT NULL CHECK (type IN ('skiArea', 'lift', 'run')),
       searchable_text TEXT NOT NULL,
+      searchable_text_ts tsvector,
       geometry JSONB NOT NULL,
       properties JSONB NOT NULL,
       import_id UUID NOT NULL,
@@ -43,6 +44,17 @@ export default async function getRepository(databaseName?: string): Promise<Repo
   await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_features_name
     ON features((properties->>'name'))
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_features_searchable_text_ts
+    ON features USING GIN(searchable_text_ts)
+  `);
+
+  // Populate tsvector for existing rows (migration)
+  await pool.query(`
+    UPDATE features
+    SET searchable_text_ts = to_tsvector('simple', searchable_text)
+    WHERE searchable_text_ts IS NULL
   `);
 
   return new Repository(pool);
