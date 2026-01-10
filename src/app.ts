@@ -13,6 +13,10 @@ export function createApp(repository: Repository) {
     next()
   })
 
+  app.get("/health", (_, res) => {
+    res.json({ status: "ok" })
+  })
+
   app.get("/index.html", async (req, res) => {
     if (req.query.obj && typeof req.query.obj === "string") {
       try {

@@ -31,6 +31,26 @@ export default async function getRepository(databaseName?: string): Promise<Repo
     )
   `);
 
+  // Run migrations before creating indexes
+  // Add searchable_text_ts column if it doesn't exist (migration)
+  await pool.query(`
+    ALTER TABLE features
+    ADD COLUMN IF NOT EXISTS searchable_text_ts tsvector
+  `);
+
+  // Add rank column if it doesn't exist (migration)
+  await pool.query(`
+    ALTER TABLE features
+    ADD COLUMN IF NOT EXISTS rank DECIMAL NOT NULL DEFAULT 0
+  `);
+
+  // Populate tsvector for existing rows (migration)
+  await pool.query(`
+    UPDATE features
+    SET searchable_text_ts = to_tsvector('simple', searchable_text)
+    WHERE searchable_text_ts IS NULL
+  `);
+
   // Create indexes if not exist
   await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_features_type ON features(type)
@@ -49,19 +69,6 @@ export default async function getRepository(databaseName?: string): Promise<Repo
   await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_features_searchable_text_ts
     ON features USING GIN(searchable_text_ts)
-  `);
-
-  // Populate tsvector for existing rows (migration)
-  await pool.query(`
-    UPDATE features
-    SET searchable_text_ts = to_tsvector('simple', searchable_text)
-    WHERE searchable_text_ts IS NULL
-  `);
-
-  // Add rank column if it doesn't exist (migration)
-  await pool.query(`
-    ALTER TABLE features
-    ADD COLUMN IF NOT EXISTS rank DECIMAL NOT NULL DEFAULT 0
   `);
 
   return new Repository(pool);

@@ -30,10 +30,11 @@ jobs:
       - name: Start services
         run: docker compose up -d
 
-      - name: Wait for services to be healthy
+      - name: Wait for app to be healthy
         run: |
-          echo "Waiting for database to be ready..."
-          timeout 30 sh -c 'until docker compose exec -T postgres pg_isready -U openskimap; do sleep 1; done'
+          echo "Waiting for app to be ready..."
+          timeout 90 sh -c 'until curl -f http://localhost:3000/health > /dev/null 2>&1; do echo "Waiting..."; sleep 2; done'
+          echo "App is healthy!"
 
       - name: Run tests
         run: docker compose exec -T app npm test
