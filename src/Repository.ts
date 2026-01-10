@@ -45,8 +45,14 @@ export class Repository {
   ): Promise<(RunFeature | LiftFeature | SkiAreaFeature)[]> => {
     const searchLower = text.toLowerCase();
 
+    // Prepare tsquery with prefix matching for all tokens
+    // "garmisch classic" → "garmisch:* & classic:*"
+    const tokens = searchLower.split(/\s+/).filter(t => t.length > 0);
+    const tsquery = tokens.map(t => `${t}:*`).join(' & ');
+
     const result = await this.pool.query(
-      `WITH scored_features AS (
+      `WITH primary_results AS (
+         -- Primary: tsvector prefix search (word boundaries)
          SELECT
            id,
            type,
@@ -63,15 +69,45 @@ export class Repository {
              WHEN type = 'lift' THEN 2
              WHEN type = 'run' THEN 1
              ELSE 0
-           END AS type_score
+           END AS type_score,
+           20 AS boundary_bonus
          FROM features
-         WHERE searchable_text % $1
+         WHERE searchable_text_ts @@ to_tsquery('simple', $2)
+       ),
+       fallback_results AS (
+         -- Fallback: LIKE search (substring matching anywhere)
+         SELECT
+           id,
+           type,
+           geometry,
+           properties,
+           CASE
+             WHEN LOWER(properties->>'name') = $1 THEN 3
+             WHEN LOWER(properties->>'name') LIKE $1 || '%' THEN 2
+             WHEN LOWER(properties->>'name') LIKE '%' || $1 || '%' THEN 1
+             ELSE 0
+           END AS name_score,
+           CASE
+             WHEN type = 'skiArea' THEN 3
+             WHEN type = 'lift' THEN 2
+             WHEN type = 'run' THEN 1
+             ELSE 0
+           END AS type_score,
+           0 AS boundary_bonus
+         FROM features
+         WHERE LOWER(searchable_text) LIKE '%' || $1 || '%'
+           AND id NOT IN (SELECT id FROM primary_results)
+       ),
+       combined_results AS (
+         SELECT * FROM primary_results
+         UNION ALL
+         SELECT * FROM fallback_results
        )
-       SELECT id, type, geometry, properties, name_score, type_score
-       FROM scored_features
-       ORDER BY (type_score * 10 + name_score) DESC
-       LIMIT $2`,
-      [searchLower, limit]
+       SELECT id, type, geometry, properties
+       FROM combined_results
+       ORDER BY (type_score * 10 + name_score + boundary_bonus) DESC
+       LIMIT $3`,
+      [searchLower, tsquery, limit]
     );
 
     return result.rows.map(rowToFeature);
@@ -92,12 +128,13 @@ export class Repository {
     const searchableText = getSearchableText(feature);
 
     await this.pool.query(
-      `INSERT INTO features (id, type, searchable_text, geometry, properties, import_id)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO features (id, type, searchable_text, searchable_text_ts, geometry, properties, import_id)
+       VALUES ($1, $2, $3, to_tsvector('simple', $3), $4, $5, $6)
        ON CONFLICT (id)
        DO UPDATE SET
          type = EXCLUDED.type,
          searchable_text = EXCLUDED.searchable_text,
+         searchable_text_ts = EXCLUDED.searchable_text_ts,
          geometry = EXCLUDED.geometry,
          properties = EXCLUDED.properties,
          import_id = EXCLUDED.import_id,

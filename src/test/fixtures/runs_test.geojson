@@ -36,7 +36,19 @@
         "sources": [{ "type": "openstreetmap", "id": "relation/11062844" }],
         "websites": [],
         "wikidataID": null,
-        "places": [],
+        "places": [
+          {
+            "iso3166_2": "DE-BY",
+            "localized": {
+              "en": {
+                "region": "Bavaria",
+                "country": "Germany",
+                "locality": "Garmisch-Partenkirchen"
+              }
+            },
+            "iso3166_1Alpha2": "DE"
+          }
+        ],
         "elevationProfile": null,
         "id": "47ef537f2be7ad61ab8ef324dfb09ac86f1615cf"
       },
@@ -94,7 +106,19 @@
         "sources": [{ "type": "openstreetmap", "id": "relation/11062842" }],
         "websites": [],
         "wikidataID": null,
-        "places": [],
+        "places": [
+          {
+            "iso3166_2": "DE-BY",
+            "localized": {
+              "en": {
+                "region": "Bavaria",
+                "country": "Germany",
+                "locality": "Garmisch-Partenkirchen"
+              }
+            },
+            "iso3166_1Alpha2": "DE"
+          }
+        ],
         "elevationProfile": null,
         "id": "57d2fcb3bfab00705841fa9a3dbc4574a871bc63"
       },
