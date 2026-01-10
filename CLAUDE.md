@@ -5,9 +5,11 @@
 All commands should be run inside the Docker container.
 
 ### Useful commands
+
 - `docker compose up` - Start services (app + database) in development mode (with file watching)
 - `docker compose exec app npm run build` - Compile TypeScript
 - `docker compose exec app npm run check-types` - Check TypeScript types
+- `docker compose exec app npm run test` - Run tests
 - `docker compose exec app npm run import-data import/ski_areas.geojson` - Import ski data
 - `docker compose exec app npm run drop-database` - Drop the database
 - `docker compose run --rm app npm install` - Install dependencies
