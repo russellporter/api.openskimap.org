@@ -25,6 +25,18 @@ describe('GET /search', () => {
       expect(response.body[0]).toHaveProperty('geometry')
     })
 
+    it('returns results for exact name match with single character second word', async () => {
+      const response = await request(app)
+        .get('/search?query=Garmisch%20L')
+        .expect(200)
+        .expect('Content-Type', /json/)
+
+      expect(response.body).toBeInstanceOf(Array)
+      expect(response.body.length).toBeGreaterThan(0)
+      expect(response.body[0].properties).toHaveProperty('type', 'skiArea')
+      expect(response.body[0].properties).toHaveProperty('name', 'Garmisch Loipen')
+    })
+
     it('returns results for partial name match', async () => {
       const response = await request(app)
         .get('/search?query=Eckbauer')
@@ -61,12 +73,27 @@ describe('GET /search', () => {
         expect(firstLiftIndex).toBeLessThan(firstRunIndex)
     })
 
-    it('limits results to 10', async () => {
+    it('returns results for a single character, and limits to to 10', async () => {
       const response = await request(app)
         .get('/search?query=a')
         .expect(200)
 
       expect(response.body.length).toEqual(10)
+      const names = response.body.map((f: any) => f.properties.name)
+      expect(names).toMatchInlineSnapshot(`
+        [
+          "Alpspitzbahn",
+          "Garmisch Loipen",
+          "Skigebiet Garmisch-Classic",
+          "Skigebiet Eckbauer",
+          "Kreuzeckbahn",
+          "Graseckbahn",
+          "Hausbergbahn",
+          "Kreuzwankl-Umfahrung",
+          "Kreuzjochlift",
+          "Mittlerer Skiweg",
+        ]
+      `)
     })
 
     it('returns empty array for no matches', async () => {

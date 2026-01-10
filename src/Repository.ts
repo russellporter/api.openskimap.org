@@ -45,6 +45,19 @@ export class Repository {
   ): Promise<(RunFeature | LiftFeature | SkiAreaFeature)[]> => {
     const searchLower = text.toLowerCase();
 
+    // For very short queries, use ILIKE instead of similarity matching
+    // as pg_trgm doesn't work well with short strings
+    const useSimpleMatch = searchLower.length <= 2;
+
+    if (!useSimpleMatch) {
+      // Set lower similarity threshold to match lifts/runs that include ski area names
+      await this.pool.query("SET pg_trgm.similarity_threshold = 0.15");
+    }
+
+    const whereClause = useSimpleMatch
+      ? "LOWER(searchable_text) LIKE '%' || $1 || '%'"
+      : "searchable_text % $1";
+
     const result = await this.pool.query(
       `WITH scored_features AS (
          SELECT
@@ -65,11 +78,11 @@ export class Repository {
              ELSE 0
            END AS type_score
          FROM features
-         WHERE searchable_text % $1
+         WHERE ${whereClause}
        )
        SELECT id, type, geometry, properties, name_score, type_score
        FROM scored_features
-       ORDER BY (type_score * 10 + name_score) DESC
+       ORDER BY (name_score * 100 + type_score * 10) DESC
        LIMIT $2`,
       [searchLower, limit]
     );
