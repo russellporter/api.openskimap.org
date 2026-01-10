@@ -51,12 +51,7 @@ export function createApp(repository: Repository) {
         return
       }
 
-      let limit = 10
-
-      const results: GeoJSON.Feature[] = await repository.search(
-        text,
-        limit
-      )
+      const results: GeoJSON.Feature[] = await repository.search(text, 10)
 
       res.send(results)
     })

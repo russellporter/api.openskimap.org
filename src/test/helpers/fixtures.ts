@@ -7,12 +7,9 @@ export async function loadTestFixtures(repository: Repository): Promise<void> {
   const importer = new DataImporter(repository)
   const importID = uuid()
 
+  const fixtureFiles = ['ski_areas_test', 'lifts_test', 'runs_test']
   const fixtureDir = path.join(__dirname, '../fixtures')
-  const files = [
-    path.join(fixtureDir, 'ski_areas_test.geojson'),
-    path.join(fixtureDir, 'lifts_test.geojson'),
-    path.join(fixtureDir, 'runs_test.geojson'),
-  ]
+  const files = fixtureFiles.map(name => path.join(fixtureDir, `${name}.geojson`))
 
   await importer.import(files, importID)
 }

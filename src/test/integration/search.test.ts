@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeAll } from 'vitest'
 import request from 'supertest'
+import { beforeAll, describe, expect, it } from 'vitest'
 import getRepository from '../../RepositoryFactory'
 import { createApp } from '../../app'
 
@@ -9,7 +9,7 @@ describe('GET /search', () => {
   beforeAll(async () => {
     const repository = await getRepository()
     app = createApp(repository)
-  }, 60000)
+  })
 
   describe('Valid searches', () => {
     it('returns results for exact name match', async () => {
@@ -43,7 +43,8 @@ describe('GET /search', () => {
         .get('/search?query=GARMISCH')
         .expect(200)
 
-      expect(response1.body.length).toBe(response2.body.length)
+      expect(response1.body).toEqual(response2.body)
+      expect(response1.body.length).toBeGreaterThan(0)
     })
 
     it('prioritizes ski areas over lifts and runs', async () => {
@@ -51,21 +52,13 @@ describe('GET /search', () => {
         .get('/search?query=Garmisch')
         .expect(200)
 
-      if (response.body.length > 1) {
         const types = response.body.map((f: any) => f.properties.type)
         const firstSkiAreaIndex = types.indexOf('skiArea')
         const firstLiftIndex = types.indexOf('lift')
         const firstRunIndex = types.indexOf('run')
 
-        if (firstSkiAreaIndex >= 0 && (firstLiftIndex >= 0 || firstRunIndex >= 0)) {
-          expect(firstSkiAreaIndex).toBeLessThan(
-            Math.min(
-              firstLiftIndex >= 0 ? firstLiftIndex : Infinity,
-              firstRunIndex >= 0 ? firstRunIndex : Infinity
-            )
-          )
-        }
-      }
+        expect(firstSkiAreaIndex).toBeLessThan(firstLiftIndex)
+        expect(firstLiftIndex).toBeLessThan(firstRunIndex)
     })
 
     it('limits results to 10', async () => {
@@ -73,7 +66,7 @@ describe('GET /search', () => {
         .get('/search?query=a')
         .expect(200)
 
-      expect(response.body.length).toBeLessThanOrEqual(10)
+      expect(response.body.length).toEqual(10)
     })
 
     it('returns empty array for no matches', async () => {

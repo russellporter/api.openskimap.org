@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeAll } from 'vitest'
 import request from 'supertest'
-import getRepository from '../../RepositoryFactory'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { createApp } from '../../app'
 import { Repository } from '../../Repository'
+import getRepository from '../../RepositoryFactory'
 
 describe('GET /features/:id.geojson', () => {
   let app: any
@@ -23,7 +23,7 @@ describe('GET /features/:id.geojson', () => {
     const lift = liftResults.find(f => f.properties.type === 'lift')
     expect(lift, 'Test data must include a lift named Graseckbahn').toBeDefined()
     validLiftId = lift!.properties.id
-  }, 60000)
+})
 
   describe('Valid feature requests', () => {
     it('returns a ski area by ID', async () => {

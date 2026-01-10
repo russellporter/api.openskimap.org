@@ -2,12 +2,12 @@ import { Pool } from "pg";
 import * as Config from "./Config";
 import { Repository } from "./Repository";
 
-export default async function getRepository(): Promise<Repository> {
+export default async function getRepository(databaseName?: string): Promise<Repository> {
   const pool = new Pool({
     host: Config.postgres.host,
     user: Config.postgres.user,
     password: Config.postgres.password,
-    database: Config.postgres.database,
+    database: databaseName ?? Config.postgres.database,
     port: Config.postgres.port,
     max: 20,
   });

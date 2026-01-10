@@ -1,7 +1,223 @@
-{"type": "FeatureCollection", "features":[
-{"properties":{"id":"026d5a169c2bac6e2769b5a3ac2ea2b83050cd54","name":"Garmisch Loipen","type":"skiArea","places":[],"status":"operating","sources":[{"id":17721,"type":"skimap.org"}],"websites":["https://www.gapa-tourismus.de/de/Winter/Langlaufen%20-%20Loipen"],"activities":["nordic"],"statistics":{"runs":{"byActivity":{"nordic":{"byDifficulty":{"easy":{"count":13,"lengthInKm":14.32144874578026,"maxElevation":764.7000000000007,"minElevation":708.9000000000015,"combinedElevationChange":34.800000000000864}}}},"maxElevation":764.7000000000007,"minElevation":708.9000000000015},"lifts":{"byType":{}},"maxElevation":764.7000000000007,"minElevation":708.9000000000015},"wikidataID":null,"runConvention":"europe"},"type":"Feature","geometry":{"type":"Point","coordinates":[11.050143241882324,47.473402574533075]}}
-,
-{"properties":{"id":"0b395320dd2d9187318380c69a466cde38e6b708","name":"Skigebiet Eckbauer","type":"skiArea","places":[],"status":"operating","sources":[{"id":"relation/18842506","type":"openstreetmap"},{"id":16618,"type":"skimap.org"}],"websites":["https://www.eckbauerbahn.de/"],"activities":["downhill"],"statistics":{"runs":{"byActivity":{"downhill":{"byDifficulty":{"advanced":{"count":1,"lengthInKm":0.6068351799699908,"maxElevation":941.1000000000005,"minElevation":736.3000000000011,"combinedElevationChange":202.1999999999989},"intermediate":{"count":4,"lengthInKm":3.4286860844091205,"maxElevation":1234.8000000000009,"minElevation":729,"combinedElevationChange":618.0000000000032}}}},"maxElevation":1234.8000000000009,"minElevation":729},"lifts":{"byType":{"gondola":{"count":1,"lengthInKm":2.07981926282856,"maxElevation":1225.9000000000015,"minElevation":730.3000000000011,"combinedElevationChange":495.60000000000036},"drag_lift":{"count":1,"lengthInKm":0.10624283010785869,"maxElevation":768.4000000000015,"minElevation":729.9000000000015,"combinedElevationChange":38.5}},"maxElevation":1225.9000000000015,"minElevation":729.9000000000015},"maxElevation":1225.9000000000015,"minElevation":729.9000000000015},"wikidataID":null,"runConvention":"europe"},"type":"Feature","geometry":{"type":"Point","coordinates":[11.127479429464287,47.474472602678574]}}
-,
-{"properties":{"id":"fa473fa12ab6059b9e93af8498afa0efdea2cff6","name":"Skigebiet Garmisch-Classic","type":"skiArea","places":[],"status":"operating","sources":[{"id":"relation/18842423","type":"openstreetmap"},{"id":977,"type":"skimap.org"}],"websites":["http://zugspitze.de/en/winter/skiarea/garmisch-classic"],"activities":["downhill"],"statistics":{"runs":{"byActivity":{"downhill":{"byDifficulty":{"easy":{"count":37,"lengthInKm":12.058304580691052,"maxElevation":1701,"minElevation":752.7000000000007,"combinedElevationChange":1444.2999999999965},"novice":{"count":1,"lengthInKm":0.08810646483600085,"maxElevation":1334.4000000000015,"minElevation":1329,"combinedElevationChange":5.200000000000728},"advanced":{"count":5,"lengthInKm":6.8815213850634835,"maxElevation":1691.8000000000009,"minElevation":743.1000000000005,"combinedElevationChange":1999.2999999999988},"intermediate":{"count":31,"lengthInKm":16.565200763608797,"maxElevation":2034.3000000000009,"minElevation":727.1000000000005,"combinedElevationChange":3201.700000000006}}}},"maxElevation":2034.3000000000009,"minElevation":727.1000000000005},"lifts":{"byType":{"t-bar":{"count":4,"lengthInKm":1.8191624132237052,"maxElevation":1475.2000000000007,"minElevation":1167.5,"combinedElevationChange":361.0000000000002},"gondola":{"count":2,"lengthInKm":4.112320318789325,"maxElevation":1638.9000000000015,"minElevation":727.1000000000005,"combinedElevationChange":1484.1000000000004},"cable_car":{"count":2,"lengthInKm":4.432380291604894,"maxElevation":2030.2000000000007,"minElevation":747.8000000000011,"combinedElevationChange":1608.0000000000002},"chair_lift":{"count":4,"lengthInKm":3.5359239460073226,"maxElevation":1867.3000000000009,"minElevation":1163.4000000000015,"combinedElevationChange":1074.499999999998},"magic_carpet":{"count":2,"lengthInKm":0.17137910559121883,"maxElevation":1632.6000000000004,"minElevation":1329.2000000000007,"combinedElevationChange":19.899999999999636}},"maxElevation":2030.2000000000007,"minElevation":727.1000000000005},"maxElevation":2030.2000000000007,"minElevation":727.1000000000005},"wikidataID":null,"runConvention":"europe"},"type":"Feature","geometry":{"type":"Point","coordinates":[11.077636526978262,47.45826922054602]}}
-]}
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "properties": {
+        "id": "026d5a169c2bac6e2769b5a3ac2ea2b83050cd54",
+        "name": "Garmisch Loipen",
+        "type": "skiArea",
+        "places": [],
+        "status": "operating",
+        "sources": [{ "id": 17721, "type": "skimap.org" }],
+        "websites": [
+          "https://www.gapa-tourismus.de/de/Winter/Langlaufen%20-%20Loipen"
+        ],
+        "activities": ["nordic"],
+        "statistics": {
+          "runs": {
+            "byActivity": {
+              "nordic": {
+                "byDifficulty": {
+                  "easy": {
+                    "count": 13,
+                    "lengthInKm": 14.32144874578026,
+                    "maxElevation": 764.7000000000007,
+                    "minElevation": 708.9000000000015,
+                    "combinedElevationChange": 34.800000000000864
+                  }
+                }
+              }
+            },
+            "maxElevation": 764.7000000000007,
+            "minElevation": 708.9000000000015
+          },
+          "lifts": { "byType": {} },
+          "maxElevation": 764.7000000000007,
+          "minElevation": 708.9000000000015
+        },
+        "wikidataID": null,
+        "runConvention": "europe"
+      },
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [11.050143241882324, 47.473402574533075]
+      }
+    },
+    {
+      "properties": {
+        "id": "0b395320dd2d9187318380c69a466cde38e6b708",
+        "name": "Skigebiet Eckbauer",
+        "type": "skiArea",
+        "places": [],
+        "status": "operating",
+        "sources": [
+          { "id": "relation/18842506", "type": "openstreetmap" },
+          { "id": 16618, "type": "skimap.org" }
+        ],
+        "websites": ["https://www.eckbauerbahn.de/"],
+        "activities": ["downhill"],
+        "statistics": {
+          "runs": {
+            "byActivity": {
+              "downhill": {
+                "byDifficulty": {
+                  "advanced": {
+                    "count": 1,
+                    "lengthInKm": 0.6068351799699908,
+                    "maxElevation": 941.1000000000005,
+                    "minElevation": 736.3000000000011,
+                    "combinedElevationChange": 202.1999999999989
+                  },
+                  "intermediate": {
+                    "count": 4,
+                    "lengthInKm": 3.4286860844091205,
+                    "maxElevation": 1234.8000000000009,
+                    "minElevation": 729,
+                    "combinedElevationChange": 618.0000000000032
+                  }
+                }
+              }
+            },
+            "maxElevation": 1234.8000000000009,
+            "minElevation": 729
+          },
+          "lifts": {
+            "byType": {
+              "gondola": {
+                "count": 1,
+                "lengthInKm": 2.07981926282856,
+                "maxElevation": 1225.9000000000015,
+                "minElevation": 730.3000000000011,
+                "combinedElevationChange": 495.60000000000036
+              },
+              "drag_lift": {
+                "count": 1,
+                "lengthInKm": 0.10624283010785869,
+                "maxElevation": 768.4000000000015,
+                "minElevation": 729.9000000000015,
+                "combinedElevationChange": 38.5
+              }
+            },
+            "maxElevation": 1225.9000000000015,
+            "minElevation": 729.9000000000015
+          },
+          "maxElevation": 1225.9000000000015,
+          "minElevation": 729.9000000000015
+        },
+        "wikidataID": null,
+        "runConvention": "europe"
+      },
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [11.127479429464287, 47.474472602678574]
+      }
+    },
+    {
+      "properties": {
+        "id": "fa473fa12ab6059b9e93af8498afa0efdea2cff6",
+        "name": "Skigebiet Garmisch-Classic",
+        "type": "skiArea",
+        "places": [],
+        "status": "operating",
+        "sources": [
+          { "id": "relation/18842423", "type": "openstreetmap" },
+          { "id": 977, "type": "skimap.org" }
+        ],
+        "websites": ["http://zugspitze.de/en/winter/skiarea/garmisch-classic"],
+        "activities": ["downhill"],
+        "statistics": {
+          "runs": {
+            "byActivity": {
+              "downhill": {
+                "byDifficulty": {
+                  "easy": {
+                    "count": 37,
+                    "lengthInKm": 12.058304580691052,
+                    "maxElevation": 1701,
+                    "minElevation": 752.7000000000007,
+                    "combinedElevationChange": 1444.2999999999965
+                  },
+                  "novice": {
+                    "count": 1,
+                    "lengthInKm": 0.08810646483600085,
+                    "maxElevation": 1334.4000000000015,
+                    "minElevation": 1329,
+                    "combinedElevationChange": 5.200000000000728
+                  },
+                  "advanced": {
+                    "count": 5,
+                    "lengthInKm": 6.8815213850634835,
+                    "maxElevation": 1691.8000000000009,
+                    "minElevation": 743.1000000000005,
+                    "combinedElevationChange": 1999.2999999999988
+                  },
+                  "intermediate": {
+                    "count": 31,
+                    "lengthInKm": 16.565200763608797,
+                    "maxElevation": 2034.3000000000009,
+                    "minElevation": 727.1000000000005,
+                    "combinedElevationChange": 3201.700000000006
+                  }
+                }
+              }
+            },
+            "maxElevation": 2034.3000000000009,
+            "minElevation": 727.1000000000005
+          },
+          "lifts": {
+            "byType": {
+              "t-bar": {
+                "count": 4,
+                "lengthInKm": 1.8191624132237052,
+                "maxElevation": 1475.2000000000007,
+                "minElevation": 1167.5,
+                "combinedElevationChange": 361.0000000000002
+              },
+              "gondola": {
+                "count": 2,
+                "lengthInKm": 4.112320318789325,
+                "maxElevation": 1638.9000000000015,
+                "minElevation": 727.1000000000005,
+                "combinedElevationChange": 1484.1000000000004
+              },
+              "cable_car": {
+                "count": 2,
+                "lengthInKm": 4.432380291604894,
+                "maxElevation": 2030.2000000000007,
+                "minElevation": 747.8000000000011,
+                "combinedElevationChange": 1608.0000000000002
+              },
+              "chair_lift": {
+                "count": 4,
+                "lengthInKm": 3.5359239460073226,
+                "maxElevation": 1867.3000000000009,
+                "minElevation": 1163.4000000000015,
+                "combinedElevationChange": 1074.499999999998
+              },
+              "magic_carpet": {
+                "count": 2,
+                "lengthInKm": 0.17137910559121883,
+                "maxElevation": 1632.6000000000004,
+                "minElevation": 1329.2000000000007,
+                "combinedElevationChange": 19.899999999999636
+              }
+            },
+            "maxElevation": 2030.2000000000007,
+            "minElevation": 727.1000000000005
+          },
+          "maxElevation": 2030.2000000000007,
+          "minElevation": 727.1000000000005
+        },
+        "wikidataID": null,
+        "runConvention": "europe"
+      },
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [11.077636526978262, 47.45826922054602]
+      }
+    }
+  ]
+}
