@@ -73,25 +73,17 @@ describe('GET /search', () => {
         expect(firstLiftIndex).toBeLessThan(firstRunIndex)
     })
 
-    it('returns relevant results for a single character, and limits to to 10', async () => {
+    it('returns relevant results for a single character (tsvector only, no ILIKE fallback)', async () => {
+      // Single character queries only use tsvector search (word boundary matching)
+      // to avoid slow full-table scans. This returns fewer results but is much faster.
       const response = await request(app)
         .get('/search?query=a')
         .expect(200)
 
-      expect(response.body.length).toEqual(10)
       const names = response.body.map((f: any) => f.properties.name)
       expect(names).toMatchInlineSnapshot(`
         [
           "Alpspitzbahn",
-          "Skigebiet Garmisch-Classic",
-          "Garmisch Loipen",
-          "Skigebiet Eckbauer",
-          "Kreuzeckbahn",
-          "Graseckbahn",
-          "Hausbergbahn",
-          "Kreuzjochlift",
-          "Kreuzwankl-Umfahrung",
-          "Mittlerer Skiweg",
         ]
       `)
     })

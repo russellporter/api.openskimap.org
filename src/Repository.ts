@@ -51,7 +51,57 @@ export class Repository {
     const tokens = searchLower.split(/\s+/).filter(t => t.length > 0);
     const tsquery = tokens.map(t => `${t}:*`).join(' & ');
 
-    const result = await this.pool.query(
+    // Skip ILIKE fallback for short queries (< 3 chars) since trigram indexes
+    // need at least 3 characters to be effective
+    const useTrigramFallback = searchLower.length >= 3;
+
+    const result = useTrigramFallback
+      ? await this.searchWithFallback(searchLower, tsquery, limit)
+      : await this.searchTsvectorOnly(searchLower, tsquery, limit);
+
+    return result.rows.map(rowToFeature);
+  };
+
+  private searchTsvectorOnly = async (
+    searchLower: string,
+    tsquery: string,
+    limit: number
+  ) => {
+    return this.pool.query(
+      `SELECT id, type, geometry, properties FROM (
+         SELECT
+           id,
+           type,
+           geometry,
+           properties,
+           rank,
+           CASE
+             WHEN LOWER(properties->>'name') = $1 THEN 3
+             WHEN LOWER(properties->>'name') LIKE $1 || '%' THEN 2
+             WHEN LOWER(properties->>'name') LIKE '%' || $1 || '%' THEN 1
+             ELSE 0
+           END AS name_score,
+           CASE
+             WHEN type = 'skiArea' THEN 3
+             WHEN type = 'lift' THEN 2
+             WHEN type = 'run' THEN 1
+             ELSE 0
+           END AS type_score
+         FROM features
+         WHERE searchable_text_ts @@ to_tsquery('simple', $2)
+       ) AS results
+       ORDER BY (type_score * 10 + name_score + 20 + rank) DESC
+       LIMIT $3`,
+      [searchLower, tsquery, limit]
+    );
+  };
+
+  private searchWithFallback = async (
+    searchLower: string,
+    tsquery: string,
+    limit: number
+  ) => {
+    return this.pool.query(
       `WITH primary_results AS (
          -- Primary: tsvector prefix search (word boundaries)
          SELECT
@@ -77,7 +127,7 @@ export class Repository {
          WHERE searchable_text_ts @@ to_tsquery('simple', $2)
        ),
        fallback_results AS (
-         -- Fallback: LIKE search (substring matching anywhere)
+         -- Fallback: ILIKE search (substring matching anywhere)
          SELECT
            id,
            type,
@@ -112,8 +162,6 @@ export class Repository {
        LIMIT $3`,
       [searchLower, tsquery, limit]
     );
-
-    return result.rows.map(rowToFeature);
   };
 
   removeExceptImport = async (importID: string): Promise<void> => {
