@@ -99,7 +99,7 @@ export class Repository {
            0 AS boundary_bonus
          FROM features
          WHERE searchable_text ILIKE '%' || $1 || '%'
-           AND id NOT IN (SELECT id FROM primary_results)
+           AND NOT EXISTS (SELECT 1 FROM primary_results p WHERE p.id = features.id)
        ),
        combined_results AS (
          SELECT * FROM primary_results
