@@ -98,7 +98,7 @@ export class Repository {
            END AS type_score,
            0 AS boundary_bonus
          FROM features
-         WHERE LOWER(searchable_text) LIKE '%' || $1 || '%'
+         WHERE searchable_text ILIKE '%' || $1 || '%'
            AND id NOT IN (SELECT id FROM primary_results)
        ),
        combined_results AS (
