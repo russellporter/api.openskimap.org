@@ -1,8 +1,8 @@
-import { LiftFeature, RunFeature, SkiAreaFeature } from "openskidata-format";
 import streamToPromise from "stream-to-promise";
 import { readGeoJSONFeatures } from "./GeoJSONReader";
 import { Repository } from "./Repository";
 import { andFinally } from "./StreamTransforms";
+import { Feature } from "./types";
 
 export class DataImporter {
   private repository: Repository;
@@ -16,7 +16,7 @@ export class DataImporter {
       await streamToPromise(
         readGeoJSONFeatures(file).pipe(
           andFinally(
-            async (feature: RunFeature | LiftFeature | SkiAreaFeature) =>
+            async (feature: Feature) =>
               await this.repository.upsert(feature, importID)
           )
         )

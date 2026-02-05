@@ -1,12 +1,7 @@
-import {
-  FeatureType,
-  LiftFeature,
-  RunFeature,
-  SkiAreaFeature,
-  SkiAreaSummaryFeature
-} from "openskidata-format";
+import { SkiAreaSummaryFeature } from "openskidata-format";
 import { Pool } from "pg";
 import { calculateRank } from "./RankCalculator";
+import { Feature } from "./types";
 
 export class Repository {
   private pool: Pool;
@@ -23,9 +18,7 @@ export class Repository {
     return result.rows[0].exists;
   };
 
-  get = async (
-    id: string
-  ): Promise<RunFeature | LiftFeature | SkiAreaFeature> => {
+  get = async (id: string): Promise<Feature> => {
     const result = await this.pool.query(
       `SELECT id, type, geometry, properties
        FROM features
@@ -40,10 +33,7 @@ export class Repository {
     return rowToFeature(result.rows[0]);
   };
 
-  search = async (
-    text: string,
-    limit: number
-  ): Promise<(RunFeature | LiftFeature | SkiAreaFeature)[]> => {
+  search = async (text: string, limit: number): Promise<Feature[]> => {
     const searchLower = text.toLowerCase();
 
     // Prepare tsquery with prefix matching for all tokens
@@ -89,6 +79,7 @@ export class Repository {
            END AS type_score
          FROM features
          WHERE searchable_text_ts @@ to_tsquery('simple', $2)
+           AND type != 'spot'
        ) AS results
        ORDER BY (type_score * 10 + name_score + 20 + rank) DESC
        LIMIT $3`,
@@ -125,6 +116,7 @@ export class Repository {
            20 AS boundary_bonus
          FROM features
          WHERE searchable_text_ts @@ to_tsquery('simple', $2)
+           AND type != 'spot'
        ),
        fallback_results AS (
          -- Fallback: ILIKE search (substring matching anywhere)
@@ -149,6 +141,7 @@ export class Repository {
            0 AS boundary_bonus
          FROM features
          WHERE searchable_text ILIKE '%' || $1 || '%'
+           AND type != 'spot'
            AND NOT EXISTS (SELECT 1 FROM primary_results p WHERE p.id = features.id)
        ),
        combined_results AS (
@@ -171,10 +164,7 @@ export class Repository {
     );
   };
 
-  upsert = async (
-    feature: LiftFeature | RunFeature | SkiAreaFeature,
-    importID: string
-  ): Promise<void> => {
+  upsert = async (feature: Feature, importID: string): Promise<void> => {
     const id = feature.properties.id;
     const searchableText = getSearchableText(feature);
     const rank = calculateRank(feature);
@@ -205,8 +195,12 @@ export class Repository {
   };
 }
 
-function getSearchableText(feature: RunFeature | LiftFeature | SkiAreaFeature | SkiAreaSummaryFeature): string {
-  let searchableText: (string | undefined | null)[] = [feature.properties.name];
+function getSearchableText(feature: Feature | SkiAreaSummaryFeature): string {
+  let searchableText: (string | undefined | null)[] = [];
+
+  if ('name' in feature.properties) {
+    searchableText.push(feature.properties.name);
+  }
 
   if ('places' in feature.properties) {
     feature.properties.places.forEach(place => {
@@ -214,9 +208,9 @@ function getSearchableText(feature: RunFeature | LiftFeature | SkiAreaFeature | 
     });
   }
 
-  if (feature.properties.type == FeatureType.Lift || feature.properties.type == FeatureType.Run) {
+  if ('skiAreas' in feature.properties) {
     feature.properties.skiAreas.forEach(skiArea => {
-      searchableText.push(getSearchableText(skiArea))
+      searchableText.push(getSearchableText(skiArea));
     });
   }
 

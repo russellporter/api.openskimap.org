@@ -19,7 +19,7 @@ export default async function getRepository(databaseName?: string): Promise<Repo
   await pool.query(`
     CREATE TABLE IF NOT EXISTS features (
       id VARCHAR(255) PRIMARY KEY,
-      type VARCHAR(20) NOT NULL CHECK (type IN ('skiArea', 'lift', 'run')),
+      type VARCHAR(20) NOT NULL CHECK (type IN ('skiArea', 'lift', 'run', 'spot')),
       searchable_text TEXT NOT NULL,
       searchable_text_ts tsvector,
       geometry JSONB NOT NULL,
@@ -29,6 +29,17 @@ export default async function getRepository(databaseName?: string): Promise<Repo
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     )
+  `);
+
+  // Migration: Update type constraint to include 'spot'
+  await pool.query(`
+    DO $$
+    BEGIN
+      ALTER TABLE features DROP CONSTRAINT IF EXISTS features_type_check;
+      ALTER TABLE features ADD CONSTRAINT features_type_check CHECK (type IN ('skiArea', 'lift', 'run', 'spot'));
+    EXCEPTION WHEN OTHERS THEN
+      NULL;
+    END $$;
   `);
 
   // Run migrations before creating indexes
