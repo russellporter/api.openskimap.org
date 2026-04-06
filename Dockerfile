@@ -3,6 +3,9 @@ FROM node:24-alpine AS base
 
 WORKDIR /app
 
+# Update npm to latest
+RUN npm install -g npm@latest
+
 # Copy package files
 COPY package*.json ./
 
