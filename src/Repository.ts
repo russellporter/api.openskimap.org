@@ -33,6 +33,38 @@ export class Repository {
     return rowToFeature(result.rows[0]);
   };
 
+  getBySourceId = async (sourceType: string, sourceId: string): Promise<Feature> => {
+    // Try string match first (covers OSM IDs stored as strings)
+    let result = await this.pool.query(
+      `SELECT id, type, geometry, properties
+       FROM features
+       WHERE properties->'sources' @> jsonb_build_array(
+         jsonb_build_object('type', $1::text, 'id', $2::text)
+       )
+       LIMIT 1`,
+      [sourceType, sourceId]
+    );
+
+    // If no match and ID is numeric, try as JSON number (skimap.org stores numeric IDs)
+    if (result.rows.length === 0 && /^\d+$/.test(sourceId)) {
+      result = await this.pool.query(
+        `SELECT id, type, geometry, properties
+         FROM features
+         WHERE properties->'sources' @> jsonb_build_array(
+           jsonb_build_object('type', $1::text, 'id', $2::numeric)
+         )
+         LIMIT 1`,
+        [sourceType, Number(sourceId)]
+      );
+    }
+
+    if (result.rows.length === 0) {
+      throw new Error(`Feature with source ${sourceType}/${sourceId} not found`);
+    }
+
+    return rowToFeature(result.rows[0]);
+  };
+
   search = async (text: string, limit: number): Promise<Feature[]> => {
     const searchLower = text.toLowerCase();
 

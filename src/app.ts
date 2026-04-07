@@ -4,6 +4,12 @@ import * as config from "./Config"
 import { async } from "./Middleware"
 import { Repository } from "./Repository"
 
+const entityTypeToSourceType: Record<string, string> = {
+  openskimap: "openskimap",
+  skimap_org: "skimap.org",
+  openstreetmap: "openstreetmap",
+};
+
 export function createApp(repository: Repository) {
   const app = express()
 
@@ -20,7 +26,19 @@ export function createApp(repository: Repository) {
   app.get("/index.html", async (req, res) => {
     if (req.query.obj && typeof req.query.obj === "string") {
       try {
-        const objectExists = await repository.has(req.query.obj)
+        const objType = typeof req.query.obj_type === "string" ? req.query.obj_type : "openskimap";
+        const sourceType = entityTypeToSourceType[objType];
+        let objectExists: boolean;
+        if (sourceType && sourceType !== "openskimap") {
+          try {
+            await repository.getBySourceId(sourceType, req.query.obj);
+            objectExists = true;
+          } catch {
+            objectExists = false;
+          }
+        } else {
+          objectExists = await repository.has(req.query.obj);
+        }
         if (!objectExists) {
           res.status(404)
         }
@@ -69,6 +87,28 @@ export function createApp(repository: Repository) {
         res.send(feature)
       } catch (error) {
         res.sendStatus(404)
+      }
+    })
+  )
+
+  app.get(
+    "/features/:entityType/:id.geojson",
+    async(async (req, res) => {
+      const entityType = req.params.entityType as string;
+      const id = req.params.id as string;
+      const sourceType = entityTypeToSourceType[entityType];
+      if (!sourceType) {
+        res.status(400).json({ error: `Unknown entity type: ${entityType}` });
+        return;
+      }
+      try {
+        const feature =
+          sourceType === "openskimap"
+            ? await repository.get(id)
+            : await repository.getBySourceId(sourceType, id);
+        res.send(feature);
+      } catch (error) {
+        res.sendStatus(404);
       }
     })
   )

@@ -81,6 +81,10 @@ export default async function getRepository(databaseName?: string): Promise<Repo
     CREATE INDEX IF NOT EXISTS idx_features_searchable_text_ts
     ON features USING GIN(searchable_text_ts)
   `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_features_properties_sources
+    ON features USING GIN((properties->'sources') jsonb_path_ops)
+  `);
 
   return new Repository(pool);
 }
