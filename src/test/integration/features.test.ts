@@ -4,6 +4,49 @@ import { createApp } from '../../app'
 import { Repository } from '../../Repository'
 import getRepository from '../../RepositoryFactory'
 
+describe('GET /features/:entityType/:id.geojson', () => {
+  let app: any
+
+  beforeAll(async () => {
+    const repository = await getRepository()
+    app = createApp(repository)
+  })
+
+  it('returns a feature by OpenStreetMap ID', async () => {
+    const response = await request(app)
+      .get('/features/openstreetmap/way%2F23943074.geojson')
+      .expect(200)
+      .expect('Content-Type', /json/)
+
+    expect(response.body.type).toBe('Feature')
+    expect(response.body.properties.type).toBe('lift')
+    expect(response.body.properties.sources).toContainEqual({ type: 'openstreetmap', id: 'way/23943074' })
+  })
+
+  it('returns a feature by skimap.org numeric ID', async () => {
+    const response = await request(app)
+      .get('/features/skimap_org/17721.geojson')
+      .expect(200)
+      .expect('Content-Type', /json/)
+
+    expect(response.body.type).toBe('Feature')
+    expect(response.body.properties.type).toBe('skiArea')
+    expect(response.body.properties.sources).toContainEqual({ type: 'skimap.org', id: 17721 })
+  })
+
+  it('returns 404 for unknown source ID', async () => {
+    await request(app)
+      .get('/features/openstreetmap/way%2F999999999999.geojson')
+      .expect(404)
+  })
+
+  it('returns 400 for unknown entity type', async () => {
+    await request(app)
+      .get('/features/unknown_source/123.geojson')
+      .expect(400)
+  })
+})
+
 describe('GET /features/:id.geojson', () => {
   let app: any
   let repository: Repository

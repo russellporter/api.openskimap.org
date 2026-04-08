@@ -34,29 +34,14 @@ export class Repository {
   };
 
   getBySourceId = async (sourceType: string, sourceId: string): Promise<Feature> => {
-    // Try string match first (covers OSM IDs stored as strings)
-    let result = await this.pool.query(
-      `SELECT id, type, geometry, properties
-       FROM features
-       WHERE properties->'sources' @> jsonb_build_array(
-         jsonb_build_object('type', $1::text, 'id', $2::text)
-       )
+    const result = await this.pool.query(
+      `SELECT f.id, f.type, f.geometry, f.properties
+       FROM features f
+       JOIN feature_sources fs ON f.id = fs.feature_id
+       WHERE fs.source_type = $1 AND fs.source_id = $2
        LIMIT 1`,
       [sourceType, sourceId]
     );
-
-    // If no match and ID is numeric, try as JSON number (skimap.org stores numeric IDs)
-    if (result.rows.length === 0 && /^\d+$/.test(sourceId)) {
-      result = await this.pool.query(
-        `SELECT id, type, geometry, properties
-         FROM features
-         WHERE properties->'sources' @> jsonb_build_array(
-           jsonb_build_object('type', $1::text, 'id', $2::numeric)
-         )
-         LIMIT 1`,
-        [sourceType, Number(sourceId)]
-      );
-    }
 
     if (result.rows.length === 0) {
       throw new Error(`Feature with source ${sourceType}/${sourceId} not found`);
@@ -224,6 +209,26 @@ export class Repository {
         importID
       ]
     );
+
+    await this.pool.query(
+      'DELETE FROM feature_sources WHERE feature_id = $1',
+      [id]
+    );
+    const sources = (feature.properties as any).sources ?? [];
+    if (sources.length > 0) {
+      const placeholders = sources
+        .map((_: unknown, i: number) => `($1, $${i * 2 + 2}, $${i * 2 + 3})`)
+        .join(', ');
+      const params: unknown[] = [
+        id,
+        ...sources.flatMap((s: { type: string; id: unknown }) => [s.type, String(s.id)]),
+      ];
+      await this.pool.query(
+        `INSERT INTO feature_sources (feature_id, source_type, source_id) VALUES ${placeholders}
+         ON CONFLICT (feature_id, source_type, source_id) DO NOTHING`,
+        params
+      );
+    }
   };
 }
 

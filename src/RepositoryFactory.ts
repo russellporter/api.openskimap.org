@@ -86,5 +86,33 @@ export default async function getRepository(databaseName?: string): Promise<Repo
     ON features USING GIN((properties->'sources') jsonb_path_ops)
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS feature_sources (
+      feature_id VARCHAR(255) NOT NULL,
+      source_type VARCHAR(50) NOT NULL,
+      source_id TEXT NOT NULL,
+      PRIMARY KEY (feature_id, source_type, source_id),
+      FOREIGN KEY (feature_id) REFERENCES features(id) ON DELETE CASCADE
+    )
+  `);
+
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_feature_sources_lookup
+    ON feature_sources(source_type, source_id)
+  `);
+
+  // Migration: populate feature_sources from existing features data
+  await pool.query(`
+    INSERT INTO feature_sources (feature_id, source_type, source_id)
+    SELECT
+      id AS feature_id,
+      src->>'type' AS source_type,
+      src->>'id' AS source_id
+    FROM features, jsonb_array_elements(properties->'sources') AS src
+    WHERE src->>'type' IS NOT NULL
+      AND src->>'id' IS NOT NULL
+    ON CONFLICT (feature_id, source_type, source_id) DO NOTHING
+  `);
+
   return new Repository(pool);
 }
