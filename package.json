@@ -10,7 +10,7 @@
     "pg": "^8.12.0",
     "stream-to-promise": "^3",
     "tslib": "^2",
-    "uuid": "^13.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
