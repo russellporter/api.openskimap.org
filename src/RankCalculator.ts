@@ -48,7 +48,15 @@ export function normalizeToRank(lengthInKm: number): number {
   return Math.min(5, Math.max(0, rank))
 }
 
-export function calculateRank(feature: GeoJSON.Feature): number {
-  const totalLength = calculateTotalRunLength(feature)
+export function calculateRank(feature: GeoJSON.Feature | { properties: unknown }): number {
+  const properties = feature.properties as { type?: string; skiAreaCount?: number } | null
+
+  // A ski pass has no runs to measure. Rank it by how many ski areas it covers, so that a search
+  // for a pass surfaces the larger ones first.
+  if (properties?.type === "skiPass") {
+    return normalizeToRank(properties.skiAreaCount ?? 0)
+  }
+
+  const totalLength = calculateTotalRunLength(feature as GeoJSON.Feature)
   return normalizeToRank(totalLength)
 }

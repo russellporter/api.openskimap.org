@@ -1,8 +1,10 @@
+import { readFile } from "fs/promises";
+import { SkiPassCatalog } from "openskidata-format";
 import streamToPromise from "stream-to-promise";
 import { readGeoJSONFeatures } from "./GeoJSONReader";
 import { Repository } from "./Repository";
 import { andFinally } from "./StreamTransforms";
-import { Feature } from "./types";
+import { Feature, SkiPassFeature } from "./types";
 
 export class DataImporter {
   private repository: Repository;
@@ -17,10 +19,43 @@ export class DataImporter {
         readGeoJSONFeatures(file).pipe(
           andFinally(
             async (feature: Feature) =>
-              await this.repository.upsert(feature, importID)
-          )
-        )
-      )
+              await this.repository.upsert(feature, importID),
+          ),
+        ),
+      );
+    }
+  };
+
+  /**
+   * Imports the actual passes from the non-GeoJSON `ski_passes.json` catalogue. Brands are
+   * presentation metadata and are deliberately not stored or searched.
+   *
+   * This must share the `importID` of the features imported alongside it, since anything from an
+   * earlier import is purged once the import finishes.
+   */
+  importSkiPasses = async (file: string, importID: string): Promise<void> => {
+    const parsed = JSON.parse(await readFile(file, "utf8"));
+    if (
+      parsed === null ||
+      typeof parsed !== "object" ||
+      !Array.isArray(parsed.brands) ||
+      !Array.isArray(parsed.passes)
+    ) {
+      throw new Error(`Expected ${file} to hold a ski pass catalog.`);
+    }
+
+    for (const skiPass of (parsed as SkiPassCatalog).passes) {
+      if (skiPass.type !== "skiPass") {
+        throw new Error(
+          `Expected ${file} to hold only ski passes, found "${skiPass.type}".`,
+        );
+      }
+      const feature: SkiPassFeature = {
+        type: "Feature",
+        geometry: null,
+        properties: skiPass,
+      };
+      await this.repository.upsert(feature, importID);
     }
   };
 

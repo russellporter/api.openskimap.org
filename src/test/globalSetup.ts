@@ -15,11 +15,13 @@ export default async function setup() {
 
   console.log('Loading fixtures...')
   const importer = new DataImporter(repository);
+  const importID = uuid();
   await importer.import([
     'src/test/fixtures/ski_areas_test.geojson',
     'src/test/fixtures/lifts_test.geojson',
     'src/test/fixtures/runs_test.geojson'
-  ], uuid())
+  ], importID)
+  await importer.importSkiPasses('src/test/fixtures/ski_passes_test.json', importID)
   
   console.log('Database setup complete!')
 }

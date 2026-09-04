@@ -3,6 +3,7 @@ import * as path from "path"
 import * as config from "./Config"
 import { async } from "./Middleware"
 import { Repository } from "./Repository"
+import { Feature } from "./types"
 
 const entityTypeToSourceType: Record<string, string> = {
   openskimap: "openskimap",
@@ -73,7 +74,8 @@ export function createApp(repository: Repository) {
         return
       }
 
-      const results: GeoJSON.Feature[] = await repository.search(text, 10)
+      // Not GeoJSON.Feature[]: a ski pass result has no geometry.
+      const results: Feature[] = await repository.search(text, 10)
 
       res.send(results)
     })
