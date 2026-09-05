@@ -13,7 +13,7 @@ services:
     ports:
       - 3000:3000
       - 9222:9222
-    command: 'sh -c "sleep 5 && npm run build && npm run start"'
+    command: npm run dev
     networks:
       - db
     depends_on:
@@ -27,7 +27,7 @@ services:
       start_period: 30s
 
   postgres:
-    image: postgres:17-alpine
+    image: postgres:18-alpine
     ports:
       - 5433:5432
     environment:
@@ -35,7 +35,7 @@ services:
       - POSTGRES_PASSWORD=openskimap_dev
       - POSTGRES_DB=openskimap
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     networks:
       - db
     healthcheck:

@@ -1,6 +1,7 @@
-import { v4 as uuid } from "uuid";
-import { DataImporter } from "../DataImporter";
-import getRepository from "../RepositoryFactory";
+import { randomUUID } from "node:crypto";
+
+import { DataImporter } from "../DataImporter.ts";
+import getRepository from "../RepositoryFactory.ts";
 
 const SKI_PASSES_FLAG = "--ski-passes=";
 
@@ -15,7 +16,7 @@ const SKI_PASSES_FLAG = "--ski-passes=";
       .filter((arg) => arg.startsWith(SKI_PASSES_FLAG))
       .map((arg) => arg.slice(SKI_PASSES_FLAG.length));
     const files = args.filter((arg) => !arg.startsWith("--"));
-    const importID = uuid();
+    const importID = randomUUID();
 
     if (files.length === 0 && skiPassFiles.length === 0) {
       console.log("No files to import. Provide files to import as arguments.");

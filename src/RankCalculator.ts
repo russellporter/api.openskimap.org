@@ -1,4 +1,4 @@
-import * as GeoJSON from "geojson"
+import type * as GeoJSON from "geojson"
 
 interface RunStatistics {
   lengthInKm?: number

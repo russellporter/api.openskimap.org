@@ -3,9 +3,6 @@ FROM node:24-alpine AS base
 
 WORKDIR /app
 
-# Update npm to latest
-RUN npm install -g npm@latest
-
 # Copy package files
 COPY package*.json ./
 
@@ -25,8 +22,8 @@ ENV NODE_ENV=development
 # Set entrypoint
 ENTRYPOINT ["docker-entrypoint-dev.sh"]
 
-# Start with watch mode
-CMD ["sh", "-c", "npm run build && npm run start"]
+# Start with Node's native TypeScript watch mode
+CMD ["npm", "run", "dev"]
 
 # Builder stage
 FROM base AS builder
@@ -37,7 +34,6 @@ RUN npm ci
 # Copy source files
 COPY tsconfig.json ./
 COPY src ./src
-COPY types ./types
 COPY scripts ./scripts
 
 # Build TypeScript

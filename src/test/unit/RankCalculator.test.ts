@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import * as GeoJSON from 'geojson'
-import { calculateTotalRunLength, normalizeToRank, calculateRank } from '../../RankCalculator'
+import type * as GeoJSON from 'geojson'
+
+import { calculateTotalRunLength, normalizeToRank, calculateRank } from '../../RankCalculator.ts'
 
 describe('RankCalculator', () => {
   describe('calculateTotalRunLength', () => {

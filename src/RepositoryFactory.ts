@@ -1,6 +1,7 @@
 import { Pool } from "pg";
-import * as Config from "./Config";
-import { Repository } from "./Repository";
+
+import * as Config from "./Config.ts";
+import { Repository } from "./Repository.ts";
 
 export default async function getRepository(databaseName?: string): Promise<Repository> {
   const pool = new Pool({

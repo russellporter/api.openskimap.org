@@ -1,10 +1,9 @@
-import { readFile } from "fs/promises";
-import { SkiPassCatalog } from "openskidata-format";
-import streamToPromise from "stream-to-promise";
-import { readGeoJSONFeatures } from "./GeoJSONReader";
-import { Repository } from "./Repository";
-import { andFinally } from "./StreamTransforms";
-import { Feature, SkiPassFeature } from "./types";
+import { readFile } from "node:fs/promises";
+import type { SkiPassCatalog } from "openskidata-format";
+
+import { readGeoJSONFeatures } from "./GeoJSONReader.ts";
+import type { Repository } from "./Repository.ts";
+import type { Feature, SkiPassFeature } from "./types.ts";
 
 export class DataImporter {
   private repository: Repository;
@@ -15,14 +14,9 @@ export class DataImporter {
 
   import = async (geoJSONFiles: string[], importID: string): Promise<void> => {
     for (const file of geoJSONFiles) {
-      await streamToPromise(
-        readGeoJSONFeatures(file).pipe(
-          andFinally(
-            async (feature: Feature) =>
-              await this.repository.upsert(feature, importID),
-          ),
-        ),
-      );
+      for await (const feature of readGeoJSONFeatures(file)) {
+        await this.repository.upsert(feature, importID);
+      }
     }
   };
 

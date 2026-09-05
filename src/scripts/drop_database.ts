@@ -1,5 +1,6 @@
 import { Pool } from "pg";
-import * as Config from "../Config";
+
+import * as Config from "../Config.ts";
 
 (async () => {
   try {

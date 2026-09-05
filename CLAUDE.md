@@ -2,7 +2,8 @@
 
 ## Development Workflow
 
-All commands should be run inside the Docker container.
+Use Node.js 24.12 or newer. All service and database commands should be run inside the Docker
+container.
 
 ### Useful commands
 
@@ -14,6 +15,10 @@ All commands should be run inside the Docker container.
 - `docker compose exec app npm run drop-database` - Drop the database
 - `docker compose run --rm app npm install` - Install dependencies
 - `docker compose exec app sh` - Get a shell inside the app container, then run commands directly
+
+The development database uses PostgreSQL 18 and its version-aware `/var/lib/postgresql` volume
+layout. A volume created by PostgreSQL 17 must be migrated or recreated before starting the
+upgraded container.
 
 ## Code Style Guidelines
 

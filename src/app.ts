@@ -1,9 +1,9 @@
 import express from "express"
-import * as path from "path"
-import * as config from "./Config"
-import { async } from "./Middleware"
-import { Repository } from "./Repository"
-import { Feature } from "./types"
+import * as path from "node:path"
+
+import * as config from "./Config.ts"
+import type { Repository } from "./Repository.ts"
+import type { Feature } from "./types.ts"
 
 const entityTypeToSourceType: Record<string, string> = {
   openskimap: "openskimap",
@@ -61,7 +61,7 @@ export function createApp(repository: Repository) {
 
   app.get(
     "/search",
-    async(async (req, res) => {
+    async (req, res) => {
       let text = req.query.query
       if (typeof text !== "string") {
         res.status(400).json({ error: 'Invalid query' })
@@ -78,24 +78,24 @@ export function createApp(repository: Repository) {
       const results: Feature[] = await repository.search(text, 10)
 
       res.send(results)
-    })
+    }
   )
 
   app.get(
     "/features/:id.geojson",
-    async(async (req, res) => {
+    async (req, res) => {
       try {
         const feature = await repository.get(req.params.id as string)
         res.send(feature)
       } catch (error) {
         res.sendStatus(404)
       }
-    })
+    }
   )
 
   app.get(
     "/features/:entityType/:id.geojson",
-    async(async (req, res) => {
+    async (req, res) => {
       const entityType = req.params.entityType as string;
       const id = req.params.id as string;
       const sourceType = entityTypeToSourceType[entityType];
@@ -112,7 +112,7 @@ export function createApp(repository: Repository) {
       } catch (error) {
         res.sendStatus(404);
       }
-    })
+    }
   )
 
   return app

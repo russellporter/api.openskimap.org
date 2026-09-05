@@ -1,9 +1,10 @@
-import { mkdtemp, rm, writeFile } from "fs/promises";
-import { tmpdir } from "os";
-import { join } from "path";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DataImporter } from "../../DataImporter";
-import { Repository } from "../../Repository";
+
+import { DataImporter } from "../../DataImporter.ts";
+import type { Repository } from "../../Repository.ts";
 
 describe("DataImporter.importSkiPasses", () => {
   let directory: string;

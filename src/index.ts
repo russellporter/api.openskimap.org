@@ -1,5 +1,5 @@
-import { createApp } from "./app"
-import getRepository from "./RepositoryFactory"
+import { createApp } from "./app.ts"
+import getRepository from "./RepositoryFactory.ts"
 
 const port = 3000
 

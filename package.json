@@ -2,41 +2,39 @@
   "name": "api.openskimap.org",
   "version": "1.0.0",
   "description": "REST API for OpenSkiMap.org frontend",
-  "main": "src/index.ts",
+  "type": "module",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=24.12"
+  },
   "dependencies": {
     "express": "^5.2.1",
-    "JSONStream": "^1.3.5",
-    "openskidata-format": "^14.0.0",
-    "pg": "^8.12.0",
-    "stream-to-promise": "^3",
-    "tslib": "^2",
-    "uuid": "^14.0.0"
+    "openskidata-format": "^15.0.0",
+    "pg": "^8.23.0",
+    "stream-chain": "^4.2.5",
+    "stream-json": "^3.6.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/geojson": "^7946.0.16",
-    "@types/pg": "^8.11.0",
-    "@types/stream-to-promise": "^2.2.5",
-    "@types/supertest": "^6.0.2",
-    "@vitest/ui": "^4.0.0",
-    "prettier": "^3.7.4",
+    "@types/node": "^24.13.3",
+    "@types/pg": "^8.23.1",
+    "@types/supertest": "^7.2.1",
     "supertest": "^7.2.2",
-    "ts-node": "^10",
-    "typescript": "^5.9.3",
-    "vitest": "^4.0.0"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
   },
   "scripts": {
     "import-data": "./scripts/import-data.sh",
     "drop-database": "./scripts/drop-database.sh",
     "build": "tsc -p .",
-    "watch": "tsc -w -p .",
-    "debug": "nodemon --watch ./dist --inspect=0.0.0.0:9222 --nolazy ./dist/index.js",
-    "docker-debug": "docker-compose up",
+    "dev": "node --watch src/index.ts",
+    "debug": "node --watch --inspect=0.0.0.0:9222 src/index.ts",
+    "docker-debug": "docker compose up",
     "start": "node ./dist/index.js",
-    "check-types": "tsc",
+    "check-types": "tsc -p tsconfig.typecheck.json",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "test:ui": "vitest --ui"
+    "test:watch": "vitest"
   },
   "author": "Russell Porter",
   "license": "ISC"

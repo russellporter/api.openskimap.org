@@ -1,5 +1,6 @@
 import { Pool } from 'pg'
-import * as Config from '../../Config'
+
+import * as Config from '../../Config.ts'
 
 function createAdminPool(): Pool {
   return new Pool({
@@ -20,7 +21,7 @@ async function executeWithAdminPool(fn: (pool: Pool) => Promise<void>): Promise<
   }
 }
 
-export async function resetDatabase(name: String): Promise<void> {
+export async function resetDatabase(name: string): Promise<void> {
   await executeWithAdminPool(async (pool) => {
     await pool.query(`DROP DATABASE IF EXISTS ${name}`)
     await pool.query(`CREATE DATABASE ${name}`)

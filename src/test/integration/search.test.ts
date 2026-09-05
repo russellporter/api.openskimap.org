@@ -1,7 +1,8 @@
 import request from 'supertest'
 import { beforeAll, describe, expect, it } from 'vitest'
-import getRepository from '../../RepositoryFactory'
-import { createApp } from '../../app'
+
+import getRepository from '../../RepositoryFactory.ts'
+import { createApp } from '../../app.ts'
 
 describe('GET /search', () => {
   let app: any

@@ -1,7 +1,8 @@
-import { SkiAreaSummaryFeature } from "openskidata-format";
+import type { SkiAreaSummaryFeature } from "openskidata-format";
 import { Pool } from "pg";
-import { calculateRank } from "./RankCalculator";
-import { Feature } from "./types";
+
+import { calculateRank } from "./RankCalculator.ts";
+import type { Feature } from "./types.ts";
 
 export class Repository {
   private pool: Pool;

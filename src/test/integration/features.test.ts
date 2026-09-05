@@ -1,8 +1,9 @@
 import request from 'supertest'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { createApp } from '../../app'
-import { Repository } from '../../Repository'
-import getRepository from '../../RepositoryFactory'
+
+import { createApp } from '../../app.ts'
+import type { Repository } from '../../Repository.ts'
+import getRepository from '../../RepositoryFactory.ts'
 
 describe('GET /features/:entityType/:id.geojson', () => {
   let app: any

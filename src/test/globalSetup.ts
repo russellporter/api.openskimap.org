@@ -1,7 +1,8 @@
-import { v4 as uuid } from "uuid"
-import { DataImporter } from '../DataImporter'
-import getRepository from '../RepositoryFactory'
-import { resetDatabase } from './helpers/database'
+import { randomUUID } from "node:crypto"
+
+import { DataImporter } from '../DataImporter.ts'
+import getRepository from '../RepositoryFactory.ts'
+import { resetDatabase } from './helpers/database.ts'
 
 export default async function setup() {
   // Needs to be duplicated here as vitest doesnt apply env from config to globalSetup.
@@ -15,7 +16,7 @@ export default async function setup() {
 
   console.log('Loading fixtures...')
   const importer = new DataImporter(repository);
-  const importID = uuid();
+  const importID = randomUUID();
   await importer.import([
     'src/test/fixtures/ski_areas_test.geojson',
     'src/test/fixtures/lifts_test.geojson',
