@@ -83,9 +83,9 @@ export class Repository {
            properties,
            rank,
            CASE
-             WHEN LOWER(properties->>'name') = $1 THEN 3
-             WHEN LOWER(properties->>'name') LIKE $1 || '%' THEN 2
-             WHEN LOWER(properties->>'name') LIKE '%' || $1 || '%' THEN 1
+             WHEN unaccent(LOWER(properties->>'name')) = unaccent($1) THEN 3
+             WHEN unaccent(LOWER(properties->>'name')) LIKE unaccent($1) || '%' THEN 2
+             WHEN unaccent(LOWER(properties->>'name')) LIKE '%' || unaccent($1) || '%' THEN 1
              ELSE 0
            END AS name_score,
            CASE
@@ -96,7 +96,7 @@ export class Repository {
              ELSE 0
            END AS type_score
          FROM features
-         WHERE searchable_text_ts @@ to_tsquery('simple', $2)
+         WHERE searchable_text_ts @@ to_tsquery('simple', unaccent($2))
            AND type != 'spot'
        ) AS results
        ORDER BY (type_score * 10 + name_score + 20 + rank) DESC
@@ -120,9 +120,9 @@ export class Repository {
            properties,
            rank,
            CASE
-             WHEN LOWER(properties->>'name') = $1 THEN 3
-             WHEN LOWER(properties->>'name') LIKE $1 || '%' THEN 2
-             WHEN LOWER(properties->>'name') LIKE '%' || $1 || '%' THEN 1
+             WHEN unaccent(LOWER(properties->>'name')) = unaccent($1) THEN 3
+             WHEN unaccent(LOWER(properties->>'name')) LIKE unaccent($1) || '%' THEN 2
+             WHEN unaccent(LOWER(properties->>'name')) LIKE '%' || unaccent($1) || '%' THEN 1
              ELSE 0
            END AS name_score,
            CASE
@@ -134,7 +134,7 @@ export class Repository {
            END AS type_score,
            20 AS boundary_bonus
          FROM features
-         WHERE searchable_text_ts @@ to_tsquery('simple', $2)
+         WHERE searchable_text_ts @@ to_tsquery('simple', unaccent($2))
            AND type != 'spot'
        ),
        fallback_results AS (
@@ -146,9 +146,9 @@ export class Repository {
            properties,
            rank,
            CASE
-             WHEN LOWER(properties->>'name') = $1 THEN 3
-             WHEN LOWER(properties->>'name') LIKE $1 || '%' THEN 2
-             WHEN LOWER(properties->>'name') LIKE '%' || $1 || '%' THEN 1
+             WHEN unaccent(LOWER(properties->>'name')) = unaccent($1) THEN 3
+             WHEN unaccent(LOWER(properties->>'name')) LIKE unaccent($1) || '%' THEN 2
+             WHEN unaccent(LOWER(properties->>'name')) LIKE '%' || unaccent($1) || '%' THEN 1
              ELSE 0
            END AS name_score,
            CASE
@@ -160,7 +160,7 @@ export class Repository {
            END AS type_score,
            0 AS boundary_bonus
          FROM features
-         WHERE searchable_text ILIKE '%' || $1 || '%'
+         WHERE searchable_text ILIKE '%' || unaccent($1) || '%'
            AND type != 'spot'
            AND NOT EXISTS (SELECT 1 FROM primary_results p WHERE p.id = features.id)
        ),
@@ -191,7 +191,7 @@ export class Repository {
 
     await this.pool.query(
       `INSERT INTO features (id, type, searchable_text, searchable_text_ts, geometry, properties, rank, import_id)
-       VALUES ($1, $2, $3, to_tsvector('simple', $3), $4, $5, $6, $7)
+       VALUES ($1, $2, unaccent($3), to_tsvector('simple', unaccent($3)), $4, $5, $6, $7)
        ON CONFLICT (id)
        DO UPDATE SET
          type = EXCLUDED.type,

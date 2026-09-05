@@ -158,6 +158,35 @@ describe('GET /search', () => {
       `)
     });
 
+    describe('Accent-insensitive search', () => {
+      it('finds accented ski area with unaccented query', async () => {
+        const response = await request(app)
+          .get('/search?query=Grun')
+          .expect(200)
+
+        const names = response.body.map((f: any) => f.properties.name)
+        expect(names).toContain('Grün-Pröller')
+      })
+
+      it('finds accented ski area with fully accented query', async () => {
+        const response = await request(app)
+          .get('/search?query=Gr%C3%BCn')
+          .expect(200)
+
+        const names = response.body.map((f: any) => f.properties.name)
+        expect(names).toContain('Grün-Pröller')
+      })
+
+      it('finds accented ski area by unaccented second word', async () => {
+        const response = await request(app)
+          .get('/search?query=Proll')
+          .expect(200)
+
+        const names = response.body.map((f: any) => f.properties.name)
+        expect(names).toContain('Grün-Pröller')
+      })
+    })
+
     it('returns empty array for no matches', async () => {
       const response = await request(app)
         .get('/search?query=NonexistentSkiArea12345')

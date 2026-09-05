@@ -12,8 +12,9 @@ export default async function getRepository(databaseName?: string): Promise<Repo
     max: 20,
   });
 
-  // Ensure pg_trgm extension is installed
+  // Ensure required extensions are installed
   await pool.query("CREATE EXTENSION IF NOT EXISTS pg_trgm");
+  await pool.query("CREATE EXTENSION IF NOT EXISTS unaccent");
 
   // Create table if not exists
   await pool.query(`

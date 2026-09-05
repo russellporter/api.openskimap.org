@@ -254,6 +254,35 @@
         "type": "Point",
         "coordinates": [11.077636526978262, 47.45826922054602]
       }
+    },
+    {
+      "properties": {
+        "id": "gruen-proeller-test-fixture-001",
+        "name": "Grün-Pröller",
+        "type": "skiArea",
+        "places": [],
+        "status": "operating",
+        "sources": [{ "id": 99999, "type": "skimap.org" }],
+        "websites": [],
+        "activities": ["downhill"],
+        "statistics": {
+          "runs": {
+            "byActivity": {},
+            "maxElevation": 1000,
+            "minElevation": 500
+          },
+          "lifts": { "byType": {} },
+          "maxElevation": 1000,
+          "minElevation": 500
+        },
+        "wikidataID": null,
+        "runConvention": "europe"
+      },
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [13.0, 48.0]
+      }
     }
   ]
 }
