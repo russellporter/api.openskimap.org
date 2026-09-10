@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "express": "^5.2.1",
-    "openskidata-format": "^15.0.0",
+    "openskidata-format": "^16.0.0",
     "pg": "^8.23.0",
     "stream-chain": "^4.2.5",
     "stream-json": "^3.6.0"

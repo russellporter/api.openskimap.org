@@ -21,10 +21,10 @@ export default async function getRepository(databaseName?: string): Promise<Repo
   await pool.query(`
     CREATE TABLE IF NOT EXISTS features (
       id VARCHAR(255) PRIMARY KEY,
-      type VARCHAR(20) NOT NULL CHECK (type IN ('skiArea', 'lift', 'run', 'spot', 'skiPass')),
+      type VARCHAR(20) NOT NULL CHECK (type IN ('skiArea', 'lift', 'run', 'spot')),
       searchable_text TEXT NOT NULL,
       searchable_text_ts tsvector,
-      -- Null for a ski pass, which is a commercial product rather than a geographic feature.
+      -- Geometry is optional for non-geographic records.
       geometry JSONB,
       properties JSONB NOT NULL,
       rank DECIMAL NOT NULL DEFAULT 0,
@@ -34,21 +34,16 @@ export default async function getRepository(databaseName?: string): Promise<Repo
     )
   `);
 
-  // Migration: Update type constraint to include 'spot' and 'skiPass'
+  // Migration: remove legacy non-feature rows and restore the feature type constraint.
   await pool.query(`
     DO $$
     BEGIN
+      DELETE FROM features WHERE type NOT IN ('skiArea', 'lift', 'run', 'spot');
       ALTER TABLE features DROP CONSTRAINT IF EXISTS features_type_check;
-      ALTER TABLE features ADD CONSTRAINT features_type_check CHECK (type IN ('skiArea', 'lift', 'run', 'spot', 'skiPass'));
+      ALTER TABLE features ADD CONSTRAINT features_type_check CHECK (type IN ('skiArea', 'lift', 'run', 'spot'));
     EXCEPTION WHEN OTHERS THEN
       NULL;
     END $$;
-  `);
-
-  // Migration: A ski pass has no geometry, so the column can no longer be NOT NULL.
-  await pool.query(`
-    ALTER TABLE features
-    ALTER COLUMN geometry DROP NOT NULL
   `);
 
   // Run migrations before creating indexes

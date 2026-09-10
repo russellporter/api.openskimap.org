@@ -22,7 +22,6 @@ export default async function setup() {
     'src/test/fixtures/lifts_test.geojson',
     'src/test/fixtures/runs_test.geojson'
   ], importID)
-  await importer.importSkiPasses('src/test/fixtures/ski_passes_test.json', importID)
   
   console.log('Database setup complete!')
 }

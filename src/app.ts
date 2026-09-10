@@ -74,7 +74,6 @@ export function createApp(repository: Repository) {
         return
       }
 
-      // Not GeoJSON.Feature[]: a ski pass result has no geometry.
       const results: Feature[] = await repository.search(text, 10)
 
       res.send(results)

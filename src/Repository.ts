@@ -90,7 +90,6 @@ export class Repository {
              ELSE 0
            END AS name_score,
            CASE
-             WHEN type = 'skiPass' THEN 4
              WHEN type = 'skiArea' THEN 3
              WHEN type = 'lift' THEN 2
              WHEN type = 'run' THEN 1
@@ -127,8 +126,7 @@ export class Repository {
              ELSE 0
            END AS name_score,
            CASE
-             WHEN type = 'skiPass' THEN 4
-             WHEN type = 'skiArea' THEN 3
+           WHEN type = 'skiArea' THEN 3
              WHEN type = 'lift' THEN 2
              WHEN type = 'run' THEN 1
              ELSE 0
@@ -153,8 +151,7 @@ export class Repository {
              ELSE 0
            END AS name_score,
            CASE
-             WHEN type = 'skiPass' THEN 4
-             WHEN type = 'skiArea' THEN 3
+           WHEN type = 'skiArea' THEN 3
              WHEN type = 'lift' THEN 2
              WHEN type = 'run' THEN 1
              ELSE 0
@@ -207,9 +204,7 @@ export class Repository {
         id,
         feature.properties.type,
         searchableText,
-        // A ski pass has no geometry. Store SQL NULL rather than a JSON null value, so that the
-        // absence is visible to the database rather than buried inside the column.
-        feature.geometry === null ? null : JSON.stringify(feature.geometry),
+        JSON.stringify(feature.geometry),
         JSON.stringify(feature.properties),
         rank,
         importID
