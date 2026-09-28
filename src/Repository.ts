@@ -1,6 +1,7 @@
 import type { SkiAreaSummaryFeature } from "openskidata-format";
 import { Pool } from "pg";
 
+import { computeBounds } from "./geometry.ts";
 import { calculateRank } from "./RankCalculator.ts";
 import type { Feature } from "./types.ts";
 
@@ -49,6 +50,39 @@ export class Repository {
     }
 
     return rowToFeature(result.rows[0]);
+  };
+
+  /**
+   * Returns features whose bounding box overlaps the given bounding box.
+   * This is an envelope-overlap match, so it can include features that only
+   * clip the box even when their geometry falls outside it.
+   */
+  getInBounds = async (
+    minLon: number,
+    minLat: number,
+    maxLon: number,
+    maxLat: number,
+    types?: string[]
+  ): Promise<Feature[]> => {
+    const params: unknown[] = [minLon, minLat, maxLon, maxLat];
+    let typeFilter = "";
+    if (types && types.length > 0) {
+      params.push(types);
+      typeFilter = ` AND type = ANY($${params.length})`;
+    }
+
+    const result = await this.pool.query(
+      `SELECT id, type, geometry, properties
+       FROM features
+       WHERE geometry IS NOT NULL
+         AND min_lon <= $3
+         AND max_lon >= $1
+         AND min_lat <= $4
+         AND max_lat >= $2${typeFilter}`,
+      params
+    );
+
+    return result.rows.map(rowToFeature);
   };
 
   search = async (text: string, limit: number): Promise<Feature[]> => {
@@ -186,10 +220,11 @@ export class Repository {
     const id = feature.properties.id;
     const searchableText = getSearchableText(feature);
     const rank = calculateRank(feature);
+    const bounds = computeBounds(feature.geometry);
 
     await this.pool.query(
-      `INSERT INTO features (id, type, searchable_text, searchable_text_ts, geometry, properties, rank, import_id)
-       VALUES ($1, $2, unaccent($3), to_tsvector('simple', unaccent($3)), $4, $5, $6, $7)
+      `INSERT INTO features (id, type, searchable_text, searchable_text_ts, geometry, properties, rank, import_id, min_lon, min_lat, max_lon, max_lat)
+       VALUES ($1, $2, unaccent($3), to_tsvector('simple', unaccent($3)), $4, $5, $6, $7, $8, $9, $10, $11)
        ON CONFLICT (id)
        DO UPDATE SET
          type = EXCLUDED.type,
@@ -199,6 +234,10 @@ export class Repository {
          properties = EXCLUDED.properties,
          rank = EXCLUDED.rank,
          import_id = EXCLUDED.import_id,
+         min_lon = EXCLUDED.min_lon,
+         min_lat = EXCLUDED.min_lat,
+         max_lon = EXCLUDED.max_lon,
+         max_lat = EXCLUDED.max_lat,
          updated_at = NOW()`,
       [
         id,
@@ -207,7 +246,11 @@ export class Repository {
         JSON.stringify(feature.geometry),
         JSON.stringify(feature.properties),
         rank,
-        importID
+        importID,
+        bounds?.minLon ?? null,
+        bounds?.minLat ?? null,
+        bounds?.maxLon ?? null,
+        bounds?.maxLat ?? null
       ]
     );
 

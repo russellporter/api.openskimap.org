@@ -1,6 +1,8 @@
+import type * as GeoJSON from "geojson";
 import { Pool } from "pg";
 
 import * as Config from "./Config.ts";
+import { computeBounds } from "./geometry.ts";
 import { Repository } from "./Repository.ts";
 
 export default async function getRepository(databaseName?: string): Promise<Repository> {
@@ -59,6 +61,15 @@ export default async function getRepository(databaseName?: string): Promise<Repo
     ADD COLUMN IF NOT EXISTS rank DECIMAL NOT NULL DEFAULT 0
   `);
 
+  // Add bounding box columns if they don't exist (migration)
+  await pool.query(`
+    ALTER TABLE features
+    ADD COLUMN IF NOT EXISTS min_lon DOUBLE PRECISION,
+    ADD COLUMN IF NOT EXISTS min_lat DOUBLE PRECISION,
+    ADD COLUMN IF NOT EXISTS max_lon DOUBLE PRECISION,
+    ADD COLUMN IF NOT EXISTS max_lat DOUBLE PRECISION
+  `);
+
   // Populate tsvector for existing rows (migration)
   await pool.query(`
     UPDATE features
@@ -84,6 +95,10 @@ export default async function getRepository(databaseName?: string): Promise<Repo
   await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_features_searchable_text_ts
     ON features USING GIN(searchable_text_ts)
+  `);
+  await pool.query(`
+    CREATE INDEX IF NOT EXISTS idx_features_bbox
+    ON features (min_lon, max_lon, min_lat, max_lat)
   `);
   await pool.query(`
     CREATE INDEX IF NOT EXISTS idx_features_properties_sources
@@ -118,5 +133,66 @@ export default async function getRepository(databaseName?: string): Promise<Repo
     ON CONFLICT (feature_id, source_type, source_id) DO NOTHING
   `);
 
+  // Migration: backfill bounding boxes for rows imported before the columns existed
+  await backfillBounds(pool);
+
   return new Repository(pool);
+}
+
+/** Computes and stores bounding box columns for rows that don't have them yet. */
+async function backfillBounds(pool: Pool): Promise<void> {
+  const result = await pool.query(
+    "SELECT id, geometry FROM features WHERE min_lon IS NULL AND geometry IS NOT NULL"
+  );
+  if (result.rows.length === 0) {
+    return;
+  }
+
+  console.log(
+    `Backfilling bounding boxes for ${result.rows.length} features...`
+  );
+
+  const CHUNK_SIZE = 500;
+  for (let start = 0; start < result.rows.length; start += CHUNK_SIZE) {
+    const ids: string[] = [];
+    const minLons: number[] = [];
+    const minLats: number[] = [];
+    const maxLons: number[] = [];
+    const maxLats: number[] = [];
+
+    for (const row of result.rows.slice(start, start + CHUNK_SIZE)) {
+      const bounds = computeBounds(row.geometry as GeoJSON.Geometry | null);
+      if (!bounds) {
+        continue;
+      }
+      ids.push(row.id);
+      minLons.push(bounds.minLon);
+      minLats.push(bounds.minLat);
+      maxLons.push(bounds.maxLon);
+      maxLats.push(bounds.maxLat);
+    }
+
+    if (ids.length === 0) {
+      continue;
+    }
+
+    await pool.query(
+      `UPDATE features AS f
+       SET min_lon = v.min_lon,
+           min_lat = v.min_lat,
+           max_lon = v.max_lon,
+           max_lat = v.max_lat
+       FROM (
+         SELECT unnest($1::varchar[]) AS id,
+                unnest($2::float8[]) AS min_lon,
+                unnest($3::float8[]) AS min_lat,
+                unnest($4::float8[]) AS max_lon,
+                unnest($5::float8[]) AS max_lat
+       ) AS v
+       WHERE f.id = v.id`,
+      [ids, minLons, minLats, maxLons, maxLats]
+    );
+  }
+
+  console.log("Bounding box backfill complete");
 }
