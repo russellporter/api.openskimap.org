@@ -11,18 +11,18 @@
     "express": "^5.2.1",
     "openskidata-format": "^16.0.0",
     "pg": "^8.23.0",
-    "stream-chain": "^4.2.5",
-    "stream-json": "^3.6.0"
+    "stream-chain": "^4.2.6",
+    "stream-json": "^3.7.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/geojson": "^7946.0.16",
-    "@types/node": "^26.4.1",
+    "@types/node": "^26.6.3",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
-    "supertest": "^7.2.2",
+    "supertest": "^7.3.0",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.2"
   },
   "scripts": {
     "import-data": "./scripts/import-data.sh",
