@@ -5,7 +5,7 @@
   "type": "module",
   "main": "dist/index.js",
   "engines": {
-    "node": ">=24.12"
+    "node": ">=26"
   },
   "dependencies": {
     "express": "^5.2.1",

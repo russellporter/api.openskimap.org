@@ -2,7 +2,7 @@
 
 ## Development Workflow
 
-Use Node.js 24.12 or newer. All service and database commands should be run inside the Docker
+Use Node.js 26 or newer. All service and database commands should be run inside the Docker
 container.
 
 ### Useful commands
